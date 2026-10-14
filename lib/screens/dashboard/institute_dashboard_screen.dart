@@ -6,6 +6,7 @@ import '../../models/institute_model.dart';
 import '../../providers/dashboard_provider.dart';
 import '../../widgets/cards/notice_card.dart';
 import '../../widgets/common/dashboard_section.dart';
+import '../../widgets/common/app_bottom_nav_bar.dart';
 
 class InstituteDashboardScreen extends StatelessWidget {
   final InstituteModel institute;
@@ -178,27 +179,37 @@ class InstituteDashboardScreen extends StatelessWidget {
             ),
 
       // Fixed bottom navigation
-      bottomNavigationBar: NavigationBar(
-        backgroundColor: Colors.white,
+      // bottomNavigationBar: NavigationBar(
+      //   backgroundColor: Colors.white,
+      //   selectedIndex: 0,
+      //   indicatorColor: const Color(0xFFE6EBFF),
+      //   destinations: const [
+      //     NavigationDestination(
+      //       icon: Icon(Icons.dashboard_outlined),
+      //       selectedIcon: Icon(Icons.dashboard),
+      //       label: 'Dashboard',
+      //     ),
+      //     NavigationDestination(
+      //       icon: Icon(Icons.grid_view_outlined),
+      //       label: 'Modules',
+      //     ),
+      //     NavigationDestination(
+      //       icon: Icon(Icons.person_outline),
+      //       label: 'Profile',
+      //     ),
+      //   ],
+      //   onDestinationSelected: (index) {
+      //     //connect these tabs when their screens are ready.
+      //   },
+      // ),
+      bottomNavigationBar: AppBottomNavBar(
         selectedIndex: 0,
-        indicatorColor: const Color(0xFFE6EBFF),
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.dashboard_outlined),
-            selectedIcon: Icon(Icons.dashboard),
-            label: 'Dashboard',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.grid_view_outlined),
-            label: 'Modules',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            label: 'Profile',
-          ),
-        ],
-        onDestinationSelected: (index) {
-          //connect these tabs when their screens are ready.
+        onTabSelected: (index) {
+          if (index == 0) {
+            return; // Already on Dashboard
+          }
+
+          // Modules and Profile navigation will be added later.
         },
       ),
     );
