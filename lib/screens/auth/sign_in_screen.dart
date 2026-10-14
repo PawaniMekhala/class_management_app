@@ -8,6 +8,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/text_styles.dart';
 import '../../widgets/buttons/primary_button.dart';
 import '../../widgets/inputs/custom_text_field.dart';
+import 'select_institute_screen.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -149,8 +150,17 @@ class _SignInScreenState extends State<SignInScreen> {
                             return;
                           }
 
-                          _showMessage(
-                            'Authentication will be connected later.',
+                          // _showMessage(
+                          //   'Authentication will be connected later.',
+                          // );
+                          // Temporary navigation until login API is connected
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const SelectInstituteScreen(
+                                userName: 'Kamala',
+                              ),
+                            ),
                           );
                         },
                       ),
