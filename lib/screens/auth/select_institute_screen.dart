@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../../providers/dashboard_provider.dart';
+import '../dashboard/institute_dashboard_screen.dart';
 
 import '../../models/institute_model.dart';
 import '../../widgets/cards/institute_card.dart';
@@ -94,8 +98,23 @@ class SelectInstituteScreen extends StatelessWidget {
                     return InstituteCard(
                       institute: institute,
                       onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Selected ${institute.name}')),
+                        // ScaffoldMessenger.of(context).showSnackBar(
+                        //   SnackBar(content: Text('Selected ${institute.name}')),
+                        // );
+
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ChangeNotifierProvider(
+                              create: (_) =>
+                                  DashboardProvider()
+                                    ..loadDashboard(institute.id),
+                              child: InstituteDashboardScreen(
+                                institute: institute,
+                                userName: userName,
+                              ),
+                            ),
+                          ),
                         );
 
                         // Next:
