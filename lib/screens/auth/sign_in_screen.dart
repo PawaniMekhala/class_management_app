@@ -9,6 +9,7 @@ import '../../core/theme/text_styles.dart';
 import '../../widgets/buttons/primary_button.dart';
 import '../../widgets/inputs/custom_text_field.dart';
 import 'select_institute_screen.dart';
+import 'register_institute_screen.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -88,7 +89,7 @@ class _SignInScreenState extends State<SignInScreen> {
                       const SizedBox(height: 10),
 
                       Text(
-                        'IMS',
+                        'THE CLASS',
                         style: AppTextStyles.subHeading.copyWith(
                           fontSize: 18,
                           color: Theme.of(context).colorScheme.onSurface,
@@ -245,8 +246,16 @@ class _SignInScreenState extends State<SignInScreen> {
                         height: 29,
                         child: OutlinedButton.icon(
                           onPressed: () {
-                            _showMessage(
-                              'Institute registration will be added later.',
+                            // _showMessage(
+                            //   'Institute registration will be added later.',
+                            // );
+
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const RegisterInstituteScreen(),
+                              ),
                             );
                           },
                           icon: const Icon(Icons.domain_add_outlined, size: 14),

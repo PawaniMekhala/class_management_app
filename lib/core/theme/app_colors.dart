@@ -5,15 +5,15 @@ class AppColors {
 
   // Brand
   static const Color primary = Color(
-    0xFF0F7A8D,
+    0xFF3D5AFE,
   ); // ocean teal (buttons, app bar, links)
   static const Color secondary = Color(
-    0xFF3EB393,
+    0xFF2196F3,
   ); // sea green (accents, chips, FAB)
 
   // Extras from the logo
   static const Color primaryDark = Color(
-    0xFF0D424C,
+    0xFF64B5F6,
   ); // deep teal (pressed states, headers)
   static const Color primaryLight = Color(
     0xFF11A2AB,
