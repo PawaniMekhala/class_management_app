@@ -46,4 +46,12 @@ class AppColors {
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
+
+  // Authentication screens (Sign In, Register, Change Password)
+  static const Color authBackground = Color(0xFFF4F5FC);
+  static const Color authFieldBackground = Color(0xFFFFFFFF);
+  static const Color authFieldBorder = Color(0xFFE2E8F0);
+  static const Color authIcon = Color(0xFF7E8AA8);
+  static const Color authHint = Color(0xFF929BB2);
+  static const Color authHeading = Color(0xFF293B78);
 }

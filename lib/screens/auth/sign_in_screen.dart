@@ -10,6 +10,7 @@ import '../../widgets/buttons/primary_button.dart';
 import '../../widgets/inputs/custom_text_field.dart';
 import 'select_institute_screen.dart';
 import 'register_institute_screen.dart';
+import 'change_password_screen.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -132,6 +133,30 @@ class _SignInScreenState extends State<SignInScreen> {
                               _obscurePassword
                                   ? Icons.visibility_outlined
                                   : Icons.visibility_off_outlined,
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      //Forgot Password
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const ChangePasswordScreen(),
+                              ),
+                            );
+                          },
+                          child: const Text(
+                            'Forgot Password?',
+                            style: TextStyle(
+                              color: AppColors.primary,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
                         ),
