@@ -11,6 +11,8 @@ import '../../widgets/common/dashboard_section.dart';
 import '../../widgets/common/app_bottom_nav_bar.dart';
 import '../../providers/notification_provider.dart';
 import 'notifications_screen.dart';
+import '../../providers/selected_institute_provider.dart';
+import 'modules_screen.dart';
 
 class InstituteDashboardScreen extends StatelessWidget {
   final InstituteModel institute;
@@ -36,6 +38,10 @@ class InstituteDashboardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final selectedInstitute = context
+        .watch<SelectedInstituteProvider>()
+        .selectedInstitute;
+
     final dashboard = context.watch<DashboardProvider>();
     final today = DateFormat('EEEE, MMMM d, yyyy').format(DateTime.now());
 
@@ -49,7 +55,7 @@ class InstituteDashboardScreen extends StatelessWidget {
         automaticallyImplyLeading: false,
         titleSpacing: 16,
         title: Text(
-          institute.name,
+          selectedInstitute.name,
           style: const TextStyle(
             color: Color(0xFF293B78),
             fontSize: 15,
@@ -155,7 +161,7 @@ class InstituteDashboardScreen extends StatelessWidget {
           : dashboard.errorMessage != null
           ? Center(child: Text(dashboard.errorMessage!))
           : RefreshIndicator(
-              onRefresh: () => dashboard.loadDashboard(institute.id),
+              onRefresh: () => dashboard.loadDashboard(selectedInstitute.id),
               child: ListView(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
@@ -268,8 +274,18 @@ class InstituteDashboardScreen extends StatelessWidget {
       bottomNavigationBar: AppBottomNavBar(
         selectedIndex: 0,
         onTabSelected: (index) {
-          if (index == 0) {
-            return; // Already on Dashboard
+          if (index == 1) {
+            final instituteProvider = context.read<SelectedInstituteProvider>();
+
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => ChangeNotifierProvider.value(
+                  value: instituteProvider,
+                  child: const ModulesScreen(),
+                ),
+              ),
+            ); // Already on Dashboard
           }
 
           // Modules and Profile navigation will be added later.

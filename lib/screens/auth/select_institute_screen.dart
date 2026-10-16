@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../providers/dashboard_provider.dart';
 import '../dashboard/institute_dashboard_screen.dart';
 import '../../providers/notification_provider.dart';
+import '../../providers/selected_institute_provider.dart';
 
 import '../../models/institute_model.dart';
 import '../../widgets/cards/institute_card.dart';
@@ -108,6 +109,12 @@ class SelectInstituteScreen extends StatelessWidget {
                           MaterialPageRoute(
                             builder: (context) => MultiProvider(
                               providers: [
+                                ChangeNotifierProvider(
+                                  create: (_) => SelectedInstituteProvider(
+                                    institutes: institutes,
+                                    selectedInstitute: institute,
+                                  ),
+                                ),
                                 ChangeNotifierProvider(
                                   create: (_) =>
                                       DashboardProvider()

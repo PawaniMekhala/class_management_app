@@ -54,4 +54,5 @@ class AppColors {
   static const Color authIcon = Color(0xFF7E8AA8);
   static const Color authHint = Color(0xFF929BB2);
   static const Color authHeading = Color(0xFF293B78);
+  static const Color moduleIconBackground = Color(0xFFE6EBFF);
 }

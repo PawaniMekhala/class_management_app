@@ -81,31 +81,36 @@ class _SignInScreenState extends State<SignInScreen> {
                       const SizedBox(height: 62),
 
                       // Institute logo
-                      Icon(
-                        Icons.account_balance_outlined,
-                        size: 43,
-                        color: AppColors.primary,
+                      // Icon(
+                      //   Icons.account_balance_outlined,
+                      //   size: 43,
+                      //   color: AppColors.primary,
+                      // ),
+                      Image.asset(
+                        'assets/images/class_logo.png',
+                        width: 150,
+                        height: 150,
+                        fit: BoxFit.contain,
                       ),
 
                       const SizedBox(height: 10),
 
-                      Text(
-                        'THE CLASS',
-                        style: AppTextStyles.subHeading.copyWith(
-                          fontSize: 18,
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
-                      ),
+                      // Text(
+                      //   'THE CLASS',
+                      //   style: AppTextStyles.subHeading.copyWith(
+                      //     fontSize: 18,
+                      //     color: Theme.of(context).colorScheme.onSurface,
+                      //   ),
+                      // ),
 
-                      const SizedBox(height: 2),
+                      // const SizedBox(height: 2),
 
-                      Text(
-                        'Institute Management System',
-                        textAlign: TextAlign.center,
-                        style: AppTextStyles.caption.copyWith(fontSize: 9),
-                      ),
-
-                      const SizedBox(height: 36),
+                      // Text(
+                      //   'Institute Management System',
+                      //   textAlign: TextAlign.center,
+                      //   style: AppTextStyles.caption.copyWith(fontSize: 9),
+                      // ),
+                      // const SizedBox(height: 36),
 
                       // Username or NIC
                       CustomTextField(
