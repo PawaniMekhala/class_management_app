@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/app_colors.dart';
+
 class AppBottomNavBar extends StatelessWidget {
   final int selectedIndex;
   final ValueChanged<int> onTabSelected;
@@ -14,31 +16,39 @@ class AppBottomNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return NavigationBar(
       height: 70,
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
       elevation: 0,
+
+      // Controls which tab is selected.
       selectedIndex: selectedIndex,
-      indicatorColor: const Color(0xFFE6EBFF),
+
+      // Light blue background behind selected icon.
+      indicatorColor: AppColors.moduleIconBackground,
+
+      // Selected and unselected icon colors.
+      labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
 
       onDestinationSelected: onTabSelected,
 
       destinations: [
         NavigationDestination(
-          icon: Icon(Icons.dashboard_outlined),
-          selectedIcon: Icon(Icons.dashboard, color: Color(0xFF3D5AFE)),
+          icon: Icon(Icons.dashboard_outlined, color: AppColors.textSecondary),
+          selectedIcon: Icon(Icons.dashboard, color: AppColors.primary),
           label: 'Dashboard',
         ),
+
         NavigationDestination(
-          icon: Icon(Icons.grid_view_outlined),
+          icon: Icon(Icons.grid_view_outlined, color: AppColors.textSecondary),
           selectedIcon: Icon(
             Icons.grid_view,
             // color: Color(0xFF3D5AFE)
-            color: Theme.of(context).colorScheme.onSurface,
+            color: AppColors.primary,
           ),
           label: 'Modules',
         ),
         NavigationDestination(
-          icon: Icon(Icons.person_outline),
-          selectedIcon: Icon(Icons.person, color: Color(0xFF3D5AFE)),
+          icon: Icon(Icons.person_outline, color: AppColors.textSecondary),
+          selectedIcon: Icon(Icons.person, color: AppColors.primary),
           label: 'Profile',
         ),
       ],

@@ -190,7 +190,7 @@ class _RegisterInstituteScreenState extends State<RegisterInstituteScreen> {
     required ValueChanged<String?> onChanged,
   }) {
     return DropdownButtonFormField<String>(
-      value: value,
+      initialValue: value,
       isExpanded: true,
       decoration: _inputDecoration(hint, icon),
       icon: const Icon(Icons.arrow_drop_down, color: Color(0xFF7E8AA8)),

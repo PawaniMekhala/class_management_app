@@ -9,8 +9,8 @@ class SelectedInstituteProvider extends ChangeNotifier {
 
   SelectedInstituteProvider({
     required this.institutes,
-    required InstituteModel selectedInstitute,
-  }) : _selectedInstitute = selectedInstitute;
+    required this._selectedInstitute,
+  });
 
   InstituteModel get selectedInstitute => _selectedInstitute;
 
