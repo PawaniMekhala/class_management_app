@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../providers/dashboard_provider.dart';
 import '../dashboard/institute_dashboard_screen.dart';
+import '../../providers/notification_provider.dart';
 
 import '../../models/institute_model.dart';
 import '../../widgets/cards/institute_card.dart';
@@ -105,13 +106,29 @@ class SelectInstituteScreen extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => ChangeNotifierProvider(
-                              create: (_) =>
-                                  DashboardProvider()
-                                    ..loadDashboard(institute.id),
+                            builder: (context) => MultiProvider(
+                              providers: [
+                                ChangeNotifierProvider(
+                                  create: (_) =>
+                                      DashboardProvider()
+                                        ..loadDashboard(institute.id),
+                                ),
+                                ChangeNotifierProvider(
+                                  create: (_) =>
+                                      NotificationProvider()
+                                        ..loadNotifications(institute.id),
+                                ),
+                              ],
                               child: InstituteDashboardScreen(
                                 institute: institute,
                                 userName: userName,
+                                // builder: (context) => ChangeNotifierProvider(
+                                //   create: (_) =>
+                                //       DashboardProvider()
+                                //         ..loadDashboard(institute.id),
+                                //   child: InstituteDashboardScreen(
+                                //     institute: institute,
+                                //     userName: userName,
                               ),
                             ),
                           ),
