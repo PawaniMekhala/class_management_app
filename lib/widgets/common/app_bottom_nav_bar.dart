@@ -59,15 +59,20 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
+import 'profile_avatar.dart';
 
 class AppBottomNavBar extends StatelessWidget {
   final int selectedIndex;
   final ValueChanged<int> onTabSelected;
 
+  // Optional profile picture for the Profile tab
+  final String? profilePhotoUrl;
+
   const AppBottomNavBar({
     super.key,
     required this.selectedIndex,
     required this.onTabSelected,
+    this.profilePhotoUrl,
   });
 
   @override
@@ -96,6 +101,12 @@ class AppBottomNavBar extends StatelessWidget {
               icon: Icons.person_outline,
               selectedIcon: Icons.person,
               label: 'Profile',
+
+              // Show profile picture if available.
+              // Otherwise show the default person icon.
+              customIcon: profilePhotoUrl != null && profilePhotoUrl!.isNotEmpty
+                  ? ProfileAvatar(photoUrl: profilePhotoUrl, radius: 12)
+                  : null,
             ),
           ],
         ),
@@ -108,6 +119,9 @@ class AppBottomNavBar extends StatelessWidget {
     required IconData icon,
     required IconData selectedIcon,
     required String label,
+
+    // Optional custom widget, such as a profile photo
+    Widget? customIcon,
   }) {
     final bool isSelected = selectedIndex == index;
 
@@ -126,11 +140,13 @@ class AppBottomNavBar extends StatelessWidget {
                 color: isSelected ? AppColors.primary : Colors.transparent,
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: Icon(
-                isSelected ? selectedIcon : icon,
-                color: isSelected ? AppColors.surface : AppColors.authIcon,
-                size: 20,
-              ),
+              child:
+                  customIcon ??
+                  Icon(
+                    isSelected ? selectedIcon : icon,
+                    color: isSelected ? AppColors.surface : AppColors.authIcon,
+                    size: 20,
+                  ),
             ),
 
             const SizedBox(height: 3),

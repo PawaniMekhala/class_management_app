@@ -8,6 +8,7 @@ import '../../providers/selected_institute_provider.dart';
 
 import '../../models/institute_model.dart';
 import '../../widgets/cards/institute_card.dart';
+import '../../providers/profile_provider.dart';
 
 class SelectInstituteScreen extends StatelessWidget {
   final String userName;
@@ -124,6 +125,12 @@ class SelectInstituteScreen extends StatelessWidget {
                                   create: (_) =>
                                       NotificationProvider()
                                         ..loadNotifications(institute.id),
+                                ),
+
+                                // Shared profile data for Dashboard, Modules, and Profile.
+                                ChangeNotifierProvider(
+                                  create: (_) =>
+                                      ProfileProvider()..loadProfile(),
                                 ),
                               ],
                               child: InstituteDashboardScreen(

@@ -55,4 +55,10 @@ class AppColors {
   static const Color authHint = Color(0xFF929BB2);
   static const Color authHeading = Color(0xFF293B78);
   static const Color moduleIconBackground = Color(0xFFE6EBFF);
+
+  // Profile screen
+  static const Color profileBackground = Color(0xFFF4F5FC);
+  static const Color profileDivider = Color(0xFFE2E8F0);
+  static const Color profileIconBackground = Color(0xFFE6EBFF);
+  static const Color profileMuted = Color(0xFF7E8AA8);
 }

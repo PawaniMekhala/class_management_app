@@ -6,6 +6,8 @@ import '../../providers/selected_institute_provider.dart';
 import '../../widgets/cards/module_card.dart';
 import '../../widgets/common/institute_dropdown.dart';
 import '../../widgets/common/app_bottom_nav_bar.dart';
+import '../../providers/profile_provider.dart';
+import '../profile/profile_screen.dart';
 
 class ModulesScreen extends StatelessWidget {
   const ModulesScreen({super.key});
@@ -150,12 +152,35 @@ class ModulesScreen extends StatelessWidget {
 
       bottomNavigationBar: AppBottomNavBar(
         selectedIndex: 1,
+
+        // Display the same user's profile picture.
+        profilePhotoUrl: context.watch<ProfileProvider>().profile?.photoUrl,
+
         onTabSelected: (index) {
           if (index == 0) {
             Navigator.pop(context);
+            return;
           }
 
-          // Profile screen will be connected later.
+          // MODULES
+          if (index == 1) {
+            return;
+          }
+
+          // PROFILE
+          if (index == 2) {
+            final profileProvider = context.read<ProfileProvider>();
+
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => ChangeNotifierProvider.value(
+                  value: profileProvider,
+                  child: const ProfileScreen(),
+                ),
+              ),
+            );
+          }
         },
       ),
     );

@@ -13,6 +13,8 @@ import '../../providers/notification_provider.dart';
 import 'notifications_screen.dart';
 import '../../providers/selected_institute_provider.dart';
 import 'modules_screen.dart';
+import '../../providers/profile_provider.dart';
+import '../profile/profile_screen.dart';
 
 class InstituteDashboardScreen extends StatelessWidget {
   final InstituteModel institute;
@@ -272,23 +274,66 @@ class InstituteDashboardScreen extends StatelessWidget {
       //   },
       // ),
       bottomNavigationBar: AppBottomNavBar(
+        // Dashboard is the currently selected tab.
         selectedIndex: 0,
+
+        // Get the current user's profile picture.
+        // If there is no picture, the default Profile icon appears.
+        profilePhotoUrl: context.watch<ProfileProvider>().profile?.photoUrl,
+
         onTabSelected: (index) {
+          // DASHBOARD TAB
+          // if (index == 1) {
+          //   final instituteProvider = context.read<SelectedInstituteProvider>();
+
+          //   Navigator.push(
+          //     context,
+          //     MaterialPageRoute(
+          //       builder: (_) => ChangeNotifierProvider.value(
+          //         value: instituteProvider,
+          //         child: const ModulesScreen(),
+          //       ),
+          //     ),
+          //   ); // Already on Dashboard
+          // }
+
+          // MODULES TAB
           if (index == 1) {
+            // Share the currently selected institute.
             final instituteProvider = context.read<SelectedInstituteProvider>();
+
+            // Share the same profile provider with Modules.
+            final profileProvider = context.read<ProfileProvider>();
+
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => MultiProvider(
+                  providers: [
+                    ChangeNotifierProvider.value(value: instituteProvider),
+                    ChangeNotifierProvider.value(value: profileProvider),
+                  ],
+                  child: const ModulesScreen(),
+                ),
+              ),
+            );
+          }
+
+          // PROFILE TAB
+          if (index == 2) {
+            // Get the existing ProfileProvider.
+            final profileProvider = context.read<ProfileProvider>();
 
             Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (_) => ChangeNotifierProvider.value(
-                  value: instituteProvider,
-                  child: const ModulesScreen(),
+                  value: profileProvider,
+                  child: const ProfileScreen(),
                 ),
               ),
-            ); // Already on Dashboard
+            );
           }
-
-          // Modules and Profile navigation will be added later.
         },
       ),
     );
