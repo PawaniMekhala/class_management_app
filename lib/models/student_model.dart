@@ -19,7 +19,7 @@ class StudentModel {
     required this.grade,
     required this.admittedAt,
     this.mobile,
-    this.photoUrl,
+    required this.photoUrl,
     this.instituteCount = 1,
     this.nic,
     this.qrCode,

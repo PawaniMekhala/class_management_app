@@ -20,6 +20,7 @@ class StudentService {
         studentCode: 'SIPGAM-ST0011',
         grade: 'Diploma',
         admittedAt: DateTime(2026, 9, 4, 11, 0),
+        photoUrl: 'https://example.com/photo.jpg',
       ),
       StudentModel(
         id: 2,
@@ -28,6 +29,7 @@ class StudentService {
         studentCode: 'SIPGAM-ST0012',
         grade: 'Diploma',
         admittedAt: DateTime(2026, 9, 4, 10, 0),
+        photoUrl: 'https://example.com/photo.jpg',
       ),
       StudentModel(
         id: 3,
@@ -36,6 +38,7 @@ class StudentService {
         studentCode: 'SIPGAM-ST0004',
         grade: 'Grade 13',
         admittedAt: DateTime(2026, 9, 4, 9, 0),
+        photoUrl: 'https://example.com/photo.jpg',
       ),
       StudentModel(
         id: 4,
@@ -44,6 +47,7 @@ class StudentService {
         studentCode: 'SIPGAM-ST0005',
         grade: 'Grade 12',
         admittedAt: DateTime(2026, 9, 4, 8, 0),
+        photoUrl: 'https://example.com/photo.jpg',
       ),
       StudentModel(
         id: 5,
@@ -52,6 +56,7 @@ class StudentService {
         studentCode: 'SIPGAM-ST0010',
         grade: 'Grade 10',
         admittedAt: DateTime(2026, 9, 4, 7, 0),
+        photoUrl: 'https://example.com/photo.jpg',
       ),
       StudentModel(
         id: 6,
@@ -60,6 +65,7 @@ class StudentService {
         studentCode: 'SIPGAM-ST0002',
         grade: 'Grade 12',
         admittedAt: DateTime(2026, 9, 4, 6, 0),
+        photoUrl: 'https://example.com/photo.jpg',
       ),
       StudentModel(
         id: 7,
@@ -69,6 +75,7 @@ class StudentService {
         grade: 'Grade 12',
         admittedAt: DateTime(2026, 9, 4, 5, 0),
         instituteCount: 2,
+        photoUrl: 'https://example.com/photo.jpg',
       ),
       StudentModel(
         id: 8,
@@ -77,6 +84,7 @@ class StudentService {
         studentCode: 'SIPGAM-ST0009',
         grade: 'Grade 10',
         admittedAt: DateTime(2026, 9, 4, 4, 0),
+        photoUrl: 'https://example.com/photo.jpg',
       ),
       StudentModel(
         id: 9,
@@ -85,6 +93,7 @@ class StudentService {
         studentCode: 'SIPGAM-ST0003',
         grade: 'Grade 12',
         admittedAt: DateTime(2026, 9, 4, 3, 0),
+        photoUrl: 'https://example.com/photo.jpg',
       ),
     ];
 

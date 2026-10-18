@@ -18,7 +18,7 @@ class UserProfileModel {
     required this.mobile,
     required this.instituteName,
     this.googleEmail,
-    this.photoUrl,
+    required this.photoUrl,
   });
 
   bool get isStudent => role == 'student';

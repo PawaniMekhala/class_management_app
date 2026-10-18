@@ -6,6 +6,8 @@ import '../../providers/student_provider.dart';
 import '../../providers/selected_institute_provider.dart';
 import '../../widgets/cards/student_list_tile.dart';
 import '../../widgets/common/qr_scan_button.dart';
+import 'student_details_screen.dart';
+import 'find_student_screen.dart';
 
 class StudentsScreen extends StatefulWidget {
   const StudentsScreen({super.key});
@@ -175,9 +177,19 @@ class _StudentsScreenState extends State<StudentsScreen>
                           return StudentListTile(
                             student: student,
                             onTap: () {
-                              // TODO: Open Student Details screen.
-                              // Pass student.id and the selected
-                              // institute ID to the details screen.
+                              final instituteId = context
+                                  .read<SelectedInstituteProvider>()
+                                  .selectedInstituteId;
+
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => StudentDetailsScreen(
+                                    student: student,
+                                    instituteId: instituteId,
+                                  ),
+                                ),
+                              );
                             },
                           );
                         },
@@ -263,11 +275,14 @@ class _StudentsScreenState extends State<StudentsScreen>
               style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
             ),
             onPressed: () {
-              // TODO: Navigate to RegisterStudentScreen
-              // when we build it from your screenshot.
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Register Student screen will be added next.'),
+              final instituteId = context
+                  .read<SelectedInstituteProvider>()
+                  .selectedInstituteId;
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => FindStudentScreen(instituteId: instituteId),
                 ),
               );
             },

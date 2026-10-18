@@ -10,6 +10,7 @@ class ProfileService {
     mobile: '0771000002',
     instituteName: 'Sipsala Institute - Gampaha (SIPGAM)',
     googleEmail: 'miraclesoft.lk@gmail.com',
+    photoUrl: 'https://example.com/photo.jpg',
   );
 
   Future<UserProfileModel> getProfile() async {
