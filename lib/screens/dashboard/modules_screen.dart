@@ -8,6 +8,8 @@ import '../../widgets/common/institute_dropdown.dart';
 import '../../widgets/common/app_bottom_nav_bar.dart';
 import '../../providers/profile_provider.dart';
 import '../profile/profile_screen.dart';
+import '../../providers/student_provider.dart';
+import '../students/students_screen.dart';
 
 class ModulesScreen extends StatelessWidget {
   const ModulesScreen({super.key});
@@ -62,8 +64,25 @@ class ModulesScreen extends StatelessWidget {
                 'Register students, profiles, guardians and approvals.',
             icon: Icons.school_outlined,
             onTap: () {
-              // TODO: Open Students screen using
-              // instituteProvider.selectedInstituteId
+              // Get the existing institute provider.
+              final instituteProvider = context
+                  .read<SelectedInstituteProvider>();
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => MultiProvider(
+                    providers: [
+                      // Share the institute selected in Modules.
+                      ChangeNotifierProvider.value(value: instituteProvider),
+
+                      // Create student data only for this route.
+                      ChangeNotifierProvider(create: (_) => StudentProvider()),
+                    ],
+                    child: const StudentsScreen(),
+                  ),
+                ),
+              );
             },
           ),
 

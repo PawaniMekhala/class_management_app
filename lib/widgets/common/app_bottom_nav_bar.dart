@@ -78,7 +78,7 @@ class AppBottomNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 70,
+      height: 90,
       decoration: const BoxDecoration(color: AppColors.surface),
       child: SafeArea(
         top: false,
