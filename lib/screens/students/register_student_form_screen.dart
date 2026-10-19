@@ -8,6 +8,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/services/student_registration_service.dart';
 import '../../models/student_registration_model.dart';
 import '../../widgets/common/registration_form_field.dart';
+import '../../widgets/buttons/primary_button.dart';
 
 class RegisterStudentFormScreen extends StatefulWidget {
   final int instituteId;
@@ -717,35 +718,11 @@ class _RegisterStudentFormScreenState extends State<RegisterStudentFormScreen> {
 
             const SizedBox(height: 20),
 
-            SizedBox(
-              height: 48,
-              child: ElevatedButton.icon(
-                onPressed: _isSubmitting ? null : _registerStudent,
-                icon: _isSubmitting
-                    ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Icon(Icons.person_add_alt_1, size: 18),
-                label: Text(
-                  _isSubmitting ? 'Registering...' : 'Register student',
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: AppColors.surface,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(11),
-                  ),
-                ),
-              ),
+            PrimaryButton(
+              text: 'Register student',
+              icon: Icons.person_add_alt_1,
+              isLoading: _isSubmitting,
+              onPressed: _registerStudent,
             ),
           ],
         ),

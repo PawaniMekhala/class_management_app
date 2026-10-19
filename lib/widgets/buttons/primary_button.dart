@@ -8,11 +8,15 @@ class PrimaryButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final bool isLoading;
 
+  // NEW: Optional icon
+  final IconData? icon;
+
   const PrimaryButton({
     super.key,
     required this.text,
     required this.onPressed,
     this.isLoading = false,
+    this.icon,
   });
 
   @override
@@ -25,6 +29,7 @@ class PrimaryButton extends StatelessWidget {
         onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
+          foregroundColor: Colors.white,
           disabledBackgroundColor: AppColors.primary.withValues(alpha: 0.6),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -39,7 +44,19 @@ class PrimaryButton extends StatelessWidget {
                   color: Colors.white,
                 ),
               )
-            : Text(text, style: AppTextStyles.button),
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Show icon only when provided
+                  if (icon != null) ...[
+                    Icon(icon, size: 19, color: Colors.white),
+                    const SizedBox(width: 8),
+                  ],
+
+                  Text(text, style: AppTextStyles.button),
+                ],
+              ),
       ),
     );
   }

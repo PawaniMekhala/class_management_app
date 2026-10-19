@@ -7,6 +7,7 @@ import '../../providers/teacher_provider.dart';
 import '../../widgets/buttons/register_fab.dart';
 import '../../widgets/cards/teacher_list_tile.dart';
 import 'teacher_details_screen.dart';
+import 'find_teacher_screen.dart';
 
 class TeachersScreen extends StatefulWidget {
   const TeachersScreen({super.key});
@@ -49,15 +50,15 @@ class _TeachersScreenState extends State<TeachersScreen> {
   void _handleTeacherMenu(String action, int teacherId) {
     switch (action) {
       case 'view':
-        // TODO: Navigate to Teacher Details screen.
+        // TO DO: Navigate to Teacher Details screen.
         break;
 
       case 'edit':
-        // TODO: Navigate to Edit Teacher screen.
+        // TO DO: Navigate to Edit Teacher screen.
         break;
 
       case 'classes':
-        // TODO: Navigate to Teacher Classes screen.
+        // TO DO: Navigate to Teacher Classes screen.
         break;
     }
 
@@ -213,12 +214,14 @@ class _TeachersScreenState extends State<TeachersScreen> {
       floatingActionButton: RegisterFab(
         label: 'Register teacher',
         onPressed: () {
-          // TODO: Open Find/Register Teacher screen
-          // after its UI is developed.
+          final instituteId = context
+              .read<SelectedInstituteProvider>()
+              .selectedInstituteId;
 
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Teacher registration screen will be added next.'),
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => FindTeacherScreen(instituteId: instituteId),
             ),
           );
         },
