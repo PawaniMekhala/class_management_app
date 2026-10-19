@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/services/teacher_registration_service.dart';
 import '../common/find_existing_person_screen.dart';
+import 'register_teacher_form_screen.dart';
 
 class FindTeacherScreen extends StatelessWidget {
   final int instituteId;
@@ -21,14 +22,20 @@ class FindTeacherScreen extends StatelessWidget {
 
       onSearch: service.searchExistingTeachers,
 
-      onRegisterNew: (context) {
-        // TODO: Navigate to RegisterTeacherFormScreen
-        // after we build it from your next screenshot.
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Register Teacher form will be added next.'),
+      onRegisterNew: (context) async {
+        final registered = await Navigator.push<bool>(
+          context,
+          MaterialPageRoute(
+            builder: (_) => RegisterTeacherFormScreen(instituteId: instituteId),
           ),
         );
+
+        if (!context.mounted) return;
+
+        if (registered == true) {
+          // Return to Teachers list after the demo submission.
+          Navigator.pop(context, true);
+        }
       },
 
       onPersonSelected: (context, teacher) {
