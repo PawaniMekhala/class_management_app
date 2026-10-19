@@ -10,6 +10,8 @@ import '../../providers/profile_provider.dart';
 import '../profile/profile_screen.dart';
 import '../../providers/student_provider.dart';
 import '../students/students_screen.dart';
+import '../../providers/teacher_provider.dart';
+import '../teachers/teachers_screen.dart';
 
 class ModulesScreen extends StatelessWidget {
   const ModulesScreen({super.key});
@@ -91,7 +93,25 @@ class ModulesScreen extends StatelessWidget {
             description: 'Teacher registration and subject allocation.',
             icon: Icons.person_outline,
             onTap: () {
-              // TODO: Open Teachers screen.
+              final selectedInstituteProvider = context
+                  .read<SelectedInstituteProvider>();
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => MultiProvider(
+                    providers: [
+                      ChangeNotifierProvider<SelectedInstituteProvider>.value(
+                        value: selectedInstituteProvider,
+                      ),
+                      ChangeNotifierProvider<TeacherProvider>(
+                        create: (_) => TeacherProvider(),
+                      ),
+                    ],
+                    child: const TeachersScreen(),
+                  ),
+                ),
+              );
             },
           ),
 

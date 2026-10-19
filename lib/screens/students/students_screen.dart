@@ -10,6 +10,7 @@ import 'student_details_screen.dart';
 import 'find_student_screen.dart';
 import '../../providers/student_profile_request_provider.dart';
 import 'student_profile_requests_tab.dart';
+import '../../widgets/buttons/register_fab.dart';
 
 class StudentsScreen extends StatefulWidget {
   const StudentsScreen({super.key});
@@ -271,15 +272,31 @@ class _StudentsScreenState extends State<StudentsScreen>
             return const SizedBox.shrink();
           }
 
-          return FloatingActionButton.extended(
-            backgroundColor: AppColors.primary,
-            foregroundColor: AppColors.surface,
-            elevation: 4,
-            icon: const Icon(Icons.add, size: 19),
-            label: const Text(
-              'Register student',
-              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-            ),
+          // return FloatingActionButton.extended(
+          //   backgroundColor: AppColors.primary,
+          //   foregroundColor: AppColors.surface,
+          //   elevation: 4,
+          //   icon: const Icon(Icons.add, size: 19),
+          //   label: const Text(
+          //     'Register student',
+          //     style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+          //   ),
+          //   onPressed: () {
+          //     final instituteId = context
+          //         .read<SelectedInstituteProvider>()
+          //         .selectedInstituteId;
+
+          //     Navigator.push(
+          //       context,
+          //       MaterialPageRoute(
+          //         builder: (_) => FindStudentScreen(instituteId: instituteId),
+          //       ),
+          //     );
+          //   },
+          // );
+
+          return RegisterFab(
+            label: 'Register student',
             onPressed: () {
               final instituteId = context
                   .read<SelectedInstituteProvider>()
