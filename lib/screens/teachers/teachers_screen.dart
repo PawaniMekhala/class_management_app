@@ -6,6 +6,7 @@ import '../../providers/selected_institute_provider.dart';
 import '../../providers/teacher_provider.dart';
 import '../../widgets/buttons/register_fab.dart';
 import '../../widgets/cards/teacher_list_tile.dart';
+import 'teacher_details_screen.dart';
 
 class TeachersScreen extends StatefulWidget {
   const TeachersScreen({super.key});
@@ -182,8 +183,19 @@ class _TeachersScreenState extends State<TeachersScreen> {
                       return TeacherListTile(
                         teacher: teacher,
                         onTap: () {
-                          // TODO: Open Teacher Details screen.
-                          // Pass teacher.id and selected institute ID.
+                          final instituteId = context
+                              .read<SelectedInstituteProvider>()
+                              .selectedInstituteId;
+
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => TeacherDetailsScreen(
+                                teacher: teacher,
+                                instituteId: instituteId,
+                              ),
+                            ),
+                          );
                         },
                         onMenuSelected: (action) {
                           _handleTeacherMenu(action, teacher.id);
