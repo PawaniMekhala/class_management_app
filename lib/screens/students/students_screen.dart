@@ -8,6 +8,8 @@ import '../../widgets/cards/student_list_tile.dart';
 import '../../widgets/common/qr_scan_button.dart';
 import 'student_details_screen.dart';
 import 'find_student_screen.dart';
+import '../../providers/student_profile_request_provider.dart';
+import 'student_profile_requests_tab.dart';
 
 class StudentsScreen extends StatefulWidget {
   const StudentsScreen({super.key});
@@ -21,6 +23,8 @@ class _StudentsScreenState extends State<StudentsScreen>
   late final TabController _tabController;
   int? _loadedInstituteId;
   final TextEditingController _searchController = TextEditingController();
+  final StudentProfileRequestProvider _profileRequestProvider =
+      StudentProfileRequestProvider();
 
   @override
   void initState() {
@@ -45,6 +49,9 @@ class _StudentsScreenState extends State<StudentsScreen>
         if (!mounted) return;
 
         context.read<StudentProvider>().loadStudents(instituteId);
+
+        // Load profile requests for the selected institute.
+        _profileRequestProvider.loadRequests(instituteId);
       });
     }
   }
@@ -53,6 +60,7 @@ class _StudentsScreenState extends State<StudentsScreen>
   void dispose() {
     _searchController.dispose();
     _tabController.dispose();
+    _profileRequestProvider.dispose();
     super.dispose();
   }
 
@@ -245,12 +253,10 @@ class _StudentsScreenState extends State<StudentsScreen>
               children: [
                 _buildStudentsTab(),
 
-                // We'll build this after you provide its UI.
-                const Center(
-                  child: Text(
-                    'Student profile requests will appear here',
-                    style: TextStyle(color: AppColors.authIcon, fontSize: 12),
-                  ),
+                // Student profile requests
+                ChangeNotifierProvider.value(
+                  value: _profileRequestProvider,
+                  child: const StudentProfileRequestsTab(),
                 ),
               ],
             ),
