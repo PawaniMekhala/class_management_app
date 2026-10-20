@@ -10,6 +10,9 @@ import 'subject_details_screen.dart';
 import '../../providers/academic_course_provider.dart';
 import 'courses_tab.dart';
 import 'course_details_screen.dart';
+import '../../providers/payment_plan_provider.dart';
+import 'payment_plans_tab.dart';
+import 'payment_plan_details_screen.dart';
 
 class AcademicScreen extends StatefulWidget {
   const AcademicScreen({super.key});
@@ -218,7 +221,11 @@ class _AcademicScreenState extends State<AcademicScreen>
                       .watch<SelectedInstituteProvider>()
                       .selectedInstituteId,
                 ),
-                const Center(child: Text('Payment plans will be added next')),
+                PaymentPlansTab(
+                  instituteId: context
+                      .watch<SelectedInstituteProvider>()
+                      .selectedInstituteId,
+                ),
               ],
             ),
           ),
@@ -257,7 +264,29 @@ class _AcademicScreenState extends State<AcademicScreen>
                 );
               },
             )
-          : null,
+          : RegisterFab(
+              label: 'New plan',
+              onPressed: () {
+                final instituteId = context
+                    .read<SelectedInstituteProvider>()
+                    .selectedInstituteId;
+
+                final paymentProvider = context.read<PaymentPlanProvider>();
+
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        ChangeNotifierProvider<PaymentPlanProvider>.value(
+                          value: paymentProvider,
+                          child: PaymentPlanDetailsScreen(
+                            instituteId: instituteId,
+                          ),
+                        ),
+                  ),
+                );
+              },
+            ),
     );
   }
 }

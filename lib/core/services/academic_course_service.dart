@@ -1,4 +1,5 @@
 import '../../models/academic_course_model.dart';
+import 'payment_plan_service.dart';
 
 class CoursePaymentPlanOption {
   final int id;
@@ -39,20 +40,18 @@ class AcademicCourseService {
     // TO DO BACKEND:
     // GET /api/institutes/{instituteId}/payment-plans
 
-    await Future.delayed(const Duration(milliseconds: 150));
+    // await Future.delayed(const Duration(milliseconds: 150));
 
-    if (instituteId != 1) return [];
+    // if (instituteId != 1) return [];
+    final plans = await PaymentPlanService().getPlans(instituteId);
 
-    return const [
-      CoursePaymentPlanOption(
-        id: 1,
-        name: 'Diploma – 6 installments · Rs. 60,000',
-      ),
-    ];
+    return plans.map((plan) {
+      return CoursePaymentPlanOption(id: plan.id, name: plan.name);
+    }).toList();
   }
 
   Future<AcademicCourseModel> saveCourse(AcademicCourseModel course) async {
-    // TODO BACKEND:
+    // TO DO BACKEND:
     // POST /api/institutes/{instituteId}/courses
     // PATCH /api/institutes/{instituteId}/courses/{courseId}
 
