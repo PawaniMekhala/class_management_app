@@ -12,6 +12,8 @@ import '../../providers/student_provider.dart';
 import '../students/students_screen.dart';
 import '../../providers/teacher_provider.dart';
 import '../teachers/teachers_screen.dart';
+import '../../providers/academic_subject_provider.dart';
+import '../academic/academic_screen.dart';
 
 class ModulesScreen extends StatelessWidget {
   const ModulesScreen({super.key});
@@ -174,7 +176,25 @@ class ModulesScreen extends StatelessWidget {
             description: 'Subjects, modules and courses.',
             icon: Icons.auto_stories_outlined,
             onTap: () {
-              // TO DO: Open Academic screen.
+              final instituteProvider = context
+                  .read<SelectedInstituteProvider>();
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => MultiProvider(
+                    providers: [
+                      ChangeNotifierProvider<SelectedInstituteProvider>.value(
+                        value: instituteProvider,
+                      ),
+                      ChangeNotifierProvider<AcademicSubjectProvider>(
+                        create: (_) => AcademicSubjectProvider(),
+                      ),
+                    ],
+                    child: const AcademicScreen(),
+                  ),
+                ),
+              );
             },
           ),
 
