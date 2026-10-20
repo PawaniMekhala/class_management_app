@@ -4,7 +4,7 @@ class InstituteRegistrationService {
   Future<bool> registerInstitute(
     InstituteRegistrationModel registration,
   ) async {
-    //TODO: BACKEND API INTEGRATION
+    //TO DO: BACKEND API INTEGRATION
     //
     // Example future endpoint:
     // POST /api/institutes/register

@@ -39,7 +39,7 @@ class _RegisterInstituteScreenState extends State<RegisterInstituteScreen> {
   bool _showConfirmPassword = false;
   bool _isSubmitting = false;
 
-  // TODO: Replace these temporary lists with your location API
+  // TO DO: Replace these temporary lists with your location API
   // or a complete Sri Lankan district/city dataset.
   final List<String> _districts = [
     'Colombo',

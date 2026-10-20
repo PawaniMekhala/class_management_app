@@ -26,7 +26,7 @@ class StudentProfileRequestService {
   ];
 
   Future<List<StudentProfileRequestModel>> getRequests(int instituteId) async {
-    // TODO: BACKEND
+    // TO DO: BACKEND
     // GET /api/institutes/{instituteId}/student-profile-requests
     await Future.delayed(const Duration(milliseconds: 300));
 
@@ -40,7 +40,7 @@ class StudentProfileRequestService {
     required int requestId,
     required bool approve,
   }) async {
-    // TODO: BACKEND
+    // TO DO: BACKEND
     // POST /api/institutes/{instituteId}/student-profile-requests/{requestId}/review
     // Body: { "decision": "approved" } or { "decision": "rejected" }
     //

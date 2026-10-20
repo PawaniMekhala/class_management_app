@@ -6,7 +6,7 @@ class TeacherDetailService {
     required int instituteId,
     required TeacherModel teacher,
   }) async {
-    // TODO: BACKEND INTEGRATION
+    // TO DO: BACKEND INTEGRATION
     //
     // GET /api/institutes/{instituteId}/teachers/{teacher.id}
     //

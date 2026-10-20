@@ -300,7 +300,7 @@ class _StudentDetailsViewState extends State<_StudentDetailsView> {
 
               TextButton.icon(
                 onPressed: () {
-                  // TODO: ADMIN ACTION
+                  // TO DO: ADMIN ACTION
                   // Open the Enroll Student in Class screen.
                   // Pass student.id and student.instituteId.
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -331,7 +331,7 @@ class _StudentDetailsViewState extends State<_StudentDetailsView> {
               (enrolledClass) => StudentEnrolledClassTile(
                 enrolledClass: enrolledClass,
                 onTap: () {
-                  // TODO: Open class details screen.
+                  // TO DO: Open class details screen.
                   // Pass enrolledClass.id.
                 },
               ),
@@ -370,7 +370,7 @@ class _StudentDetailsViewState extends State<_StudentDetailsView> {
                 onPressed: student == null
                     ? null
                     : () {
-                        // TODO: Open Edit Student screen.
+                        // TO DO: Open Edit Student screen.
                         // Pass student.id and student.instituteId.
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
@@ -386,7 +386,7 @@ class _StudentDetailsViewState extends State<_StudentDetailsView> {
               PopupMenuButton<String>(
                 icon: const Icon(Icons.more_vert),
                 onSelected: (value) {
-                  // TODO: Connect admin actions to backend.
+                  // TO DO: Connect admin actions to backend.
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text('$value action will be added later.'),

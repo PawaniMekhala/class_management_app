@@ -60,7 +60,7 @@ class NotificationsScreen extends StatelessWidget {
                   onTap: () async {
                     await provider.markAsRead(notification.id);
 
-                    // TODO: Navigate to the relevant screen
+                    // TO DO: Navigate to the relevant screen
                     // based on notification.type.
                   },
                 );

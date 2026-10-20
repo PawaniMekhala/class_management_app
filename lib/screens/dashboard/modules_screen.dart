@@ -53,7 +53,7 @@ class ModulesScreen extends StatelessWidget {
             onChanged: (institute) {
               instituteProvider.selectInstitute(institute);
 
-              // TODO: When backend is connected,
+              // TO DO: When backend is connected,
               // refresh institute-specific module data.
             },
           ),
@@ -120,7 +120,7 @@ class ModulesScreen extends StatelessWidget {
             description: 'Classes, timetable and class sessions.',
             icon: Icons.groups_outlined,
             onTap: () {
-              // TODO: Open Classes screen.
+              // TO DO: Open Classes screen.
             },
           ),
 
@@ -129,7 +129,7 @@ class ModulesScreen extends StatelessWidget {
             description: 'Enroll students into classes.',
             icon: Icons.how_to_reg_outlined,
             onTap: () {
-              // TODO: Open Enrollment screen.
+              // TO DO: Open Enrollment screen.
             },
           ),
 
@@ -138,7 +138,7 @@ class ModulesScreen extends StatelessWidget {
             description: 'QR check-in / check-out and attendance records.',
             icon: Icons.fact_check_outlined,
             onTap: () {
-              // TODO: Open Attendance screen.
+              // TO DO: Open Attendance screen.
             },
           ),
 
@@ -147,7 +147,7 @@ class ModulesScreen extends StatelessWidget {
             description: 'Fees, payment collection, receipts and refunds.',
             icon: Icons.payments_outlined,
             onTap: () {
-              // TODO: Open Payments screen.
+              // TO DO: Open Payments screen.
             },
           ),
 
@@ -156,7 +156,7 @@ class ModulesScreen extends StatelessWidget {
             description: 'Tutes and learning materials, distribution.',
             icon: Icons.menu_book_outlined,
             onTap: () {
-              // TODO: Open Tutes screen.
+              // TO DO: Open Tutes screen.
             },
           ),
 
@@ -165,7 +165,7 @@ class ModulesScreen extends StatelessWidget {
             description: 'Lecture halls, facilities and hall schedule.',
             icon: Icons.meeting_room_outlined,
             onTap: () {
-              // TODO: Open Halls screen.
+              // TO DO: Open Halls screen.
             },
           ),
 
@@ -174,7 +174,7 @@ class ModulesScreen extends StatelessWidget {
             description: 'Subjects, modules and courses.',
             icon: Icons.auto_stories_outlined,
             onTap: () {
-              // TODO: Open Academic screen.
+              // TO DO: Open Academic screen.
             },
           ),
 
@@ -183,7 +183,7 @@ class ModulesScreen extends StatelessWidget {
             description: 'Staff accounts and their roles.',
             icon: Icons.badge_outlined,
             onTap: () {
-              // TODO: Open Staff screen.
+              // TO DO: Open Staff screen.
             },
           ),
         ],

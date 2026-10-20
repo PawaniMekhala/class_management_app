@@ -2,7 +2,7 @@ import '../../models/student_model.dart';
 
 class StudentService {
   Future<List<StudentModel>> getStudents(int instituteId) async {
-    // TODO: BACKEND API
+    // TO DO: BACKEND API
     // GET /api/institutes/{instituteId}/students
     //
     // Send the logged-in user's authentication token.

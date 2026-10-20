@@ -305,13 +305,13 @@ class ProfileScreen extends StatelessWidget {
 
                 const Divider(color: AppColors.profileDivider),
 
-                // TODO: Show this only if the user can
+                // TO DO: Show this only if the user can
                 // switch between multiple institutes.
                 _actionRow(
                   icon: Icons.swap_horiz,
                   title: 'Switch institute',
                   onTap: () {
-                    // TODO: Connect to the existing
+                    // TO DO: Connect to the existing
                     // institute-selection flow.
                   },
                 ),
@@ -326,7 +326,7 @@ class ProfileScreen extends StatelessWidget {
                       style: TextStyle(color: AppColors.primary, fontSize: 11),
                     ),
                     onTap: () {
-                      // TODO: Add secure Google unlink API.
+                      // TO DO: Add secure Google unlink API.
                     },
                   ),
 
@@ -338,7 +338,7 @@ class ProfileScreen extends StatelessWidget {
                     color: AppColors.authIcon,
                   ),
                   onTap: () {
-                    // TODO: Connect your app theme provider.
+                    // TO DO: Connect your app theme provider.
                   },
                 ),
 

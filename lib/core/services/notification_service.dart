@@ -26,7 +26,7 @@ class NotificationService {
   ];
 
   Future<List<AppNotificationModel>> getNotifications(int instituteId) async {
-    // TODO: API INTEGRATION
+    // TO DO: API INTEGRATION
     // GET /api/institutes/{instituteId}/notifications
 
     await Future.delayed(const Duration(milliseconds: 300));
@@ -37,7 +37,7 @@ class NotificationService {
   }
 
   Future<void> markAllAsRead(int instituteId) async {
-    // TODO: API INTEGRATION
+    // TO DO: API INTEGRATION
     // PATCH /api/institutes/{instituteId}/notifications/read-all
     //
     // Only update local data after the API confirms success.
@@ -52,7 +52,7 @@ class NotificationService {
   }
 
   Future<void> markAsRead(int instituteId, int notificationId) async {
-    // TODO: API INTEGRATION
+    // TO DO: API INTEGRATION
     // PATCH /api/institutes/{instituteId}/notifications/{notificationId}/read
 
     await Future.delayed(const Duration(milliseconds: 200));

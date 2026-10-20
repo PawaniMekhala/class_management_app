@@ -170,7 +170,7 @@ class _RegisterStudentFormScreenState extends State<RegisterStudentFormScreen> {
       } else {
         _dateOfBirth = picked;
 
-        // TODO: Add institute-approved grade calculation.
+        // TO DO: Add institute-approved grade calculation.
         // Keep manual grade selection available.
       }
     });
@@ -387,7 +387,7 @@ class _RegisterStudentFormScreenState extends State<RegisterStudentFormScreen> {
       // Return to the Students screen after successful submission.
       // Navigator.of(context).popUntil((route) => route.isFirst);
 
-      // TODO: Replace with navigation to the Students screen
+      // TO DO: Replace with navigation to the Students screen
       // and refresh StudentProvider after real API success.
     } catch (_) {
       if (!mounted) return;

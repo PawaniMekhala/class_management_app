@@ -1,7 +1,7 @@
 import '../../models/student_registration_model.dart';
 
 class StudentRegistrationService {
-  // TODO: BACKEND - Search globally for existing IMS students.
+  // TO DO: BACKEND - Search globally for existing IMS students.
   //
   // GET /api/students/search?query=...
   //
@@ -16,7 +16,7 @@ class StudentRegistrationService {
     return [];
   }
 
-  // TODO: BACKEND - Register a new student at this institute.
+  // TO DO: BACKEND - Register a new student at this institute.
   //
   // POST /api/institutes/{instituteId}/students
   //

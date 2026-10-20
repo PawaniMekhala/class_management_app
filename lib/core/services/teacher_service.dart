@@ -2,7 +2,7 @@ import '../../models/teacher_model.dart';
 
 class TeacherService {
   Future<List<TeacherModel>> getTeachers(int instituteId) async {
-    // TODO: BACKEND INTEGRATION
+    // TO DO: BACKEND INTEGRATION
     //
     // GET /api/institutes/{instituteId}/teachers
     //

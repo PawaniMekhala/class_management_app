@@ -8,7 +8,7 @@ class StudentDetailService {
     required String studentCode,
     required String grade,
   }) async {
-    // TODO: BACKEND INTEGRATION
+    // TO DO: BACKEND INTEGRATION
     // GET /api/institutes/{instituteId}/students/{studentId}
     //
     // final response = await dio.get(

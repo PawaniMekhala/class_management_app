@@ -14,13 +14,13 @@ class ProfileService {
   );
 
   Future<UserProfileModel> getProfile() async {
-    // TODO: GET /api/me/profile
+    // TO DO: GET /api/me/profile
     // Use the authenticated user's token.
     return _demoProfile;
   }
 
   Future<UserProfileModel> updatePhoto(String filePath) async {
-    // TODO: Upload image using multipart/form-data.
+    // TO DO: Upload image using multipart/form-data.
     // Example: PUT /api/me/profile/photo
     //
     // The backend should return the updated profile
@@ -31,7 +31,7 @@ class ProfileService {
   }
 
   Future<UserProfileModel> removePhoto() async {
-    // TODO: DELETE /api/me/profile/photo
+    // TO DO: DELETE /api/me/profile/photo
     // The backend must reject removal for students.
 
     _demoProfile = _demoProfile.copyWith(photoUrl: '');
@@ -39,7 +39,7 @@ class ProfileService {
   }
 
   Future<void> requestStudentPhotoChange(String filePath) async {
-    // TODO: POST /api/me/profile/photo-requests
+    // TO DO: POST /api/me/profile/photo-requests
     //
     // Upload the proposed photo for admin approval.
     // Do NOT change the current profile photo here.

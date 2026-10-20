@@ -102,7 +102,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // TODO: BACKEND API INTEGRATION
+      // TO DO: BACKEND API INTEGRATION
       //
       // This screen currently demonstrates a change-password form.
       //

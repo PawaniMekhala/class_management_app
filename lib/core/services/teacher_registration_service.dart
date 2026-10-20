@@ -4,7 +4,7 @@ class TeacherRegistrationService {
   Future<List<Map<String, dynamic>>> searchExistingTeachers(
     String query,
   ) async {
-    // BACKEND INTEGRATION
+    // TO DO: BACKEND INTEGRATION
     //
     // GET /api/teachers/search?query={query}
     //
