@@ -14,6 +14,7 @@ import '../../providers/teacher_provider.dart';
 import '../teachers/teachers_screen.dart';
 import '../../providers/academic_subject_provider.dart';
 import '../academic/academic_screen.dart';
+import '../../providers/academic_course_provider.dart';
 
 class ModulesScreen extends StatelessWidget {
   const ModulesScreen({super.key});
@@ -189,6 +190,9 @@ class ModulesScreen extends StatelessWidget {
                       ),
                       ChangeNotifierProvider<AcademicSubjectProvider>(
                         create: (_) => AcademicSubjectProvider(),
+                      ),
+                      ChangeNotifierProvider<AcademicCourseProvider>(
+                        create: (_) => AcademicCourseProvider(),
                       ),
                     ],
                     child: const AcademicScreen(),

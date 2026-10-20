@@ -7,6 +7,9 @@ import '../../providers/selected_institute_provider.dart';
 import '../../widgets/buttons/register_fab.dart';
 import '../../widgets/cards/academic_subject_tile.dart';
 import 'subject_details_screen.dart';
+import '../../providers/academic_course_provider.dart';
+import 'courses_tab.dart';
+import 'course_details_screen.dart';
 
 class AcademicScreen extends StatefulWidget {
   const AcademicScreen({super.key});
@@ -210,7 +213,11 @@ class _AcademicScreenState extends State<AcademicScreen>
               controller: _tabController,
               children: [
                 _buildSubjectsTab(),
-                const Center(child: Text('Courses will be added next')),
+                CoursesTab(
+                  instituteId: context
+                      .watch<SelectedInstituteProvider>()
+                      .selectedInstituteId,
+                ),
                 const Center(child: Text('Payment plans will be added next')),
               ],
             ),
@@ -226,6 +233,28 @@ class _AcademicScreenState extends State<AcademicScreen>
                     .selectedInstituteId;
 
                 _openSubject(instituteId: instituteId);
+              },
+            )
+          : _tabController.index == 1
+          ? RegisterFab(
+              label: 'New course',
+              onPressed: () {
+                final instituteId = context
+                    .read<SelectedInstituteProvider>()
+                    .selectedInstituteId;
+
+                final courseProvider = context.read<AcademicCourseProvider>();
+
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        ChangeNotifierProvider<AcademicCourseProvider>.value(
+                          value: courseProvider,
+                          child: CourseDetailsScreen(instituteId: instituteId),
+                        ),
+                  ),
+                );
               },
             )
           : null,
