@@ -16,6 +16,8 @@ import '../../providers/academic_subject_provider.dart';
 import '../academic/academic_screen.dart';
 import '../../providers/academic_course_provider.dart';
 import '../../providers/payment_plan_provider.dart';
+import '../../providers/hall_provider.dart';
+import '../halls/halls_screen.dart';
 
 class ModulesScreen extends StatelessWidget {
   const ModulesScreen({super.key});
@@ -169,7 +171,25 @@ class ModulesScreen extends StatelessWidget {
             description: 'Lecture halls, facilities and hall schedule.',
             icon: Icons.meeting_room_outlined,
             onTap: () {
-              // TO DO: Open Halls screen.
+              final instituteProvider = context
+                  .read<SelectedInstituteProvider>();
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => MultiProvider(
+                    providers: [
+                      ChangeNotifierProvider<SelectedInstituteProvider>.value(
+                        value: instituteProvider,
+                      ),
+                      ChangeNotifierProvider<HallProvider>(
+                        create: (_) => HallProvider(),
+                      ),
+                    ],
+                    child: const HallsScreen(),
+                  ),
+                ),
+              );
             },
           ),
 

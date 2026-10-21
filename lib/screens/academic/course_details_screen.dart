@@ -455,9 +455,9 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
                     physics: const NeverScrollableScrollPhysics(),
                     buildDefaultDragHandles: false,
                     itemCount: _moduleIds.length,
-                    onReorder: (oldIndex, newIndex) {
+                    onReorderItem: (oldIndex, newIndex) {
                       setState(() {
-                        if (newIndex > oldIndex) newIndex--;
+                        // if (newIndex > oldIndex) newIndex--;
                         final item = _moduleIds.removeAt(oldIndex);
                         _moduleIds.insert(newIndex, item);
                       });
