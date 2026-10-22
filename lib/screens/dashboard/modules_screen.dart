@@ -20,6 +20,8 @@ import '../../providers/hall_provider.dart';
 import '../halls/halls_screen.dart';
 import '../../providers/class_provider.dart';
 import '../classes/classes_screen.dart';
+import '../../providers/enrollment_provider.dart';
+import '../enrollment/enrollment_screen.dart';
 
 class ModulesScreen extends StatelessWidget {
   const ModulesScreen({super.key});
@@ -68,6 +70,7 @@ class ModulesScreen extends StatelessWidget {
 
           const SizedBox(height: 12),
 
+          // Students module card
           ModuleCard(
             title: 'Students',
             description:
@@ -96,6 +99,7 @@ class ModulesScreen extends StatelessWidget {
             },
           ),
 
+          // Teachers module card
           ModuleCard(
             title: 'Teachers',
             description: 'Teacher registration and subject allocation.',
@@ -123,6 +127,7 @@ class ModulesScreen extends StatelessWidget {
             },
           ),
 
+          // Classes module card
           ModuleCard(
             title: 'Classes',
             description: 'Classes, timetable and class sessions.',
@@ -150,15 +155,35 @@ class ModulesScreen extends StatelessWidget {
             },
           ),
 
+          // Enrollment module card
           ModuleCard(
             title: 'Enrollment',
             description: 'Enroll students into classes.',
             icon: Icons.how_to_reg_outlined,
             onTap: () {
-              // TO DO: Open Enrollment screen.
+              final instituteProvider = context
+                  .read<SelectedInstituteProvider>();
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => MultiProvider(
+                    providers: [
+                      ChangeNotifierProvider<SelectedInstituteProvider>.value(
+                        value: instituteProvider,
+                      ),
+                      ChangeNotifierProvider<EnrollmentProvider>(
+                        create: (_) => EnrollmentProvider(),
+                      ),
+                    ],
+                    child: const EnrollmentScreen(),
+                  ),
+                ),
+              );
             },
           ),
 
+          // Attendance module card
           ModuleCard(
             title: 'Attendance',
             description: 'QR check-in / check-out and attendance records.',
@@ -168,6 +193,7 @@ class ModulesScreen extends StatelessWidget {
             },
           ),
 
+          // Payments module card
           ModuleCard(
             title: 'Payments',
             description: 'Fees, payment collection, receipts and refunds.',
@@ -177,6 +203,7 @@ class ModulesScreen extends StatelessWidget {
             },
           ),
 
+          // Tutes module card
           ModuleCard(
             title: 'Tutes',
             description: 'Tutes and learning materials, distribution.',
@@ -186,6 +213,7 @@ class ModulesScreen extends StatelessWidget {
             },
           ),
 
+          // Halls module card
           ModuleCard(
             title: 'Halls',
             description: 'Lecture halls, facilities and hall schedule.',
@@ -213,6 +241,7 @@ class ModulesScreen extends StatelessWidget {
             },
           ),
 
+          // Academic module card
           ModuleCard(
             title: 'Academic',
             description: 'Subjects, modules and courses.',
@@ -246,6 +275,7 @@ class ModulesScreen extends StatelessWidget {
             },
           ),
 
+          // Staff module card
           ModuleCard(
             title: 'Staff',
             description: 'Staff accounts and their roles.',

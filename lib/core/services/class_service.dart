@@ -142,6 +142,63 @@ class ClassService {
     );
   }
 
+  Future<InstituteClass> updateClass(InstituteClass updatedClass) async {
+    // TO DO BACKEND:
+    // PUT /api/institutes/{updatedClass.instituteId}/classes/{updatedClass.id}
+
+    await Future.delayed(const Duration(milliseconds: 250));
+
+    // Find the existing class.
+    final index = _classes.indexWhere(
+      (item) =>
+          item.id == updatedClass.id &&
+          item.instituteId == updatedClass.instituteId,
+    );
+
+    if (index == -1) {
+      throw Exception('Class not found');
+    }
+
+    // Update the existing class in demo memory.
+    _classes[index] = updatedClass;
+
+    return updatedClass;
+  }
+
+  Future<InstituteClass> enrollStudent(
+    InstituteClass classItem,
+    ClassStudent student,
+  ) async {
+    // TO DO BACKEND:
+    // POST /api/institutes/{classItem.instituteId}/classes/{classItem.id}/enrollments
+
+    // Always retrieve the latest class data.
+    final currentClass = await getClass(classItem.instituteId, classItem.id);
+
+    // Check if the student is already enrolled.
+    final alreadyEnrolled = currentClass.students.any(
+      (existingStudent) => existingStudent.id == student.id,
+    );
+
+    if (alreadyEnrolled) {
+      throw Exception('Student is already enrolled in this class.');
+    }
+
+    // Check whether the class has available seats.
+    if (currentClass.students.length >= currentClass.maxStudents) {
+      throw Exception('This class is full.');
+    }
+
+    // Create an updated student list.
+    final updatedStudents = [...currentClass.students, student];
+
+    // Update the class without changing other details.
+    final updatedClass = currentClass.copyWith(students: updatedStudents);
+
+    // Save the updated class.
+    return await updateClass(updatedClass);
+  }
+
   List<ClassSession> generateSessions(
     InstituteClass item,
     DateTime from,

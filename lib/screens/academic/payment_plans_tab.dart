@@ -193,11 +193,28 @@ class _PaymentPlansTabState extends State<PaymentPlansTab> {
                                 color: AppColors.authIcon,
                               ),
                             ),
-                            onTap: () {
+                            // onTap: () {
+                            //   final paymentProvider = context
+                            //       .read<PaymentPlanProvider>();
+
+                            //   Navigator.push(
+                            //     context,
+                            //     MaterialPageRoute(
+                            //       builder: (_) => ChangeNotifierProvider.value(
+                            //         value: paymentProvider,
+                            //         child: PaymentPlanDetailsScreen(
+                            //           instituteId: widget.instituteId,
+                            //           planId: plan.id,
+                            //         ),
+                            //       ),
+                            //     ),
+                            //   );
+                            // },
+                            onTap: () async {
                               final paymentProvider = context
                                   .read<PaymentPlanProvider>();
 
-                              Navigator.push(
+                              final changed = await Navigator.push<bool>(
                                 context,
                                 MaterialPageRoute(
                                   builder: (_) => ChangeNotifierProvider.value(
@@ -209,6 +226,14 @@ class _PaymentPlansTabState extends State<PaymentPlansTab> {
                                   ),
                                 ),
                               );
+
+                              if (!mounted) return;
+
+                              if (changed == true) {
+                                await paymentProvider.loadPlans(
+                                  widget.instituteId,
+                                );
+                              }
                             },
                           );
                         },
