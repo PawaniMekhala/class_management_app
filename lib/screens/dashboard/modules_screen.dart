@@ -24,6 +24,7 @@ import '../../providers/enrollment_provider.dart';
 import '../enrollment/enrollment_screen.dart';
 import '../payments/payments_screen.dart';
 import '../../providers/payment_provider.dart';
+import '../../providers/outstanding_provider.dart';
 
 class ModulesScreen extends StatelessWidget {
   const ModulesScreen({super.key});
@@ -196,7 +197,6 @@ class ModulesScreen extends StatelessWidget {
           ),
 
           // Payments module card
-          // Payments module card
           ModuleCard(
             title: 'Payments',
             description: 'Fees, payment collection, receipts and refunds.',
@@ -229,6 +229,9 @@ class ModulesScreen extends StatelessWidget {
                       ),
                       ChangeNotifierProvider<PaymentProvider>(
                         create: (_) => PaymentProvider(),
+                      ),
+                      ChangeNotifierProvider<OutstandingProvider>(
+                        create: (_) => OutstandingProvider(),
                       ),
                     ],
                     child: PaymentsScreen(instituteId: selectedInstituteId),

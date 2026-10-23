@@ -22,6 +22,20 @@ class PaymentService {
   }
 
   // TO DO BACKEND:
+  // GET /api/institutes/{instituteId}/charges/outstanding
+  Future<List<PaymentCharge>> getOutstandingCharges(int instituteId) async {
+    _initializeDemoCharges();
+
+    await Future.delayed(const Duration(milliseconds: 300));
+
+    return _charges
+        .where(
+          (charge) => charge.instituteId == instituteId && charge.balance > 0,
+        )
+        .toList();
+  }
+
+  // TO DO BACKEND:
   // GET /api/institutes/{instituteId}/payments
   Future<List<StudentPayment>> getPayments(int instituteId) async {
     return _payments

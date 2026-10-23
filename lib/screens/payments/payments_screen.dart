@@ -8,6 +8,7 @@ import '../../widgets/common/student_search_field.dart';
 import 'student_payment_details_screen.dart';
 import '../../providers/payment_provider.dart';
 import 'receipts_tab.dart';
+import 'outstanding_tab.dart';
 
 class PaymentsScreen extends StatefulWidget {
   final int instituteId;
@@ -22,6 +23,7 @@ class _PaymentsScreenState extends State<PaymentsScreen>
     with SingleTickerProviderStateMixin {
   late final TabController _tabController;
   int _receiptsRefreshKey = 0;
+  int _outstandingRefreshKey = 0;
 
   List<StudentModel> _students = [];
   List<StudentModel> _searchResults = [];
@@ -36,9 +38,17 @@ class _PaymentsScreenState extends State<PaymentsScreen>
 
     // Refresh receipts when the Receipts tab is selected.
     _tabController.addListener(() {
-      if (_tabController.index == 1 && !_tabController.indexIsChanging) {
+      if (_tabController.indexIsChanging) return;
+
+      if (_tabController.index == 1) {
         setState(() {
           _receiptsRefreshKey++;
+        });
+      }
+
+      if (_tabController.index == 2) {
+        setState(() {
+          _outstandingRefreshKey++;
         });
       }
     });
@@ -194,7 +204,12 @@ class _PaymentsScreenState extends State<PaymentsScreen>
                   key: ValueKey('${widget.instituteId}-$_receiptsRefreshKey'),
                   instituteId: widget.instituteId,
                 ),
-                const Center(child: Text('Outstanding')),
+                OutstandingTab(
+                  key: ValueKey(
+                    '${widget.instituteId}-$_outstandingRefreshKey',
+                  ),
+                  instituteId: widget.instituteId,
+                ),
                 const Center(child: Text('Refunds')),
               ],
             ),
