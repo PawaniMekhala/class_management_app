@@ -369,7 +369,7 @@ class _RegisterStudentFormScreenState extends State<RegisterStudentFormScreen> {
         ],
       );
 
-      // TODO: Upload _profilePhoto with the registration request
+      // TO DO: Upload _profilePhoto with the registration request
       // once the backend is connected.
       await _service.registerStudent(input);
 

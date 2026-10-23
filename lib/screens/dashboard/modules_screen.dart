@@ -22,6 +22,8 @@ import '../../providers/class_provider.dart';
 import '../classes/classes_screen.dart';
 import '../../providers/enrollment_provider.dart';
 import '../enrollment/enrollment_screen.dart';
+import '../payments/payments_screen.dart';
+import '../../providers/payment_provider.dart';
 
 class ModulesScreen extends StatelessWidget {
   const ModulesScreen({super.key});
@@ -194,12 +196,45 @@ class ModulesScreen extends StatelessWidget {
           ),
 
           // Payments module card
+          // Payments module card
           ModuleCard(
             title: 'Payments',
             description: 'Fees, payment collection, receipts and refunds.',
             icon: Icons.payments_outlined,
             onTap: () {
-              // TO DO: Open Payments screen.
+              // 1. Get the currently selected institute.
+              final instituteProvider = context
+                  .read<SelectedInstituteProvider>();
+
+              final selectedInstituteId = instituteProvider.selectedInstituteId;
+
+              // 2. Check whether an institute is selected.
+              // if (selectedInstituteId == null) {
+              //   ScaffoldMessenger.of(context).showSnackBar(
+              //     const SnackBar(
+              //       content: Text('Please select an institute first.'),
+              //     ),
+              //   );
+              //   return;
+              // }
+
+              // 3. Open the Payments screen.
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => MultiProvider(
+                    providers: [
+                      ChangeNotifierProvider<SelectedInstituteProvider>.value(
+                        value: instituteProvider,
+                      ),
+                      ChangeNotifierProvider<PaymentProvider>(
+                        create: (_) => PaymentProvider(),
+                      ),
+                    ],
+                    child: PaymentsScreen(instituteId: selectedInstituteId),
+                  ),
+                ),
+              );
             },
           ),
 

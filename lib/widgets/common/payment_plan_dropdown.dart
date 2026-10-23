@@ -46,7 +46,8 @@ class PaymentPlanDropdown extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DropdownButtonFormField<int>(
-      key: ValueKey(selectedPlan?.id),
+      // key: ValueKey(selectedPlan?.id),
+      key: ValueKey('${selectedPlan?.id}-${plans.map((p) => p.id).join(",")}'),
       initialValue: selectedPlan?.id,
       isExpanded: true,
       decoration: InputDecoration(
