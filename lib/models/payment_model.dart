@@ -78,6 +78,7 @@ class StudentPayment {
   final double amount;
   final List<PaymentAllocation> allocations;
   final String receiptNumber;
+  final String? referenceNumber;
 
   const StudentPayment({
     required this.id,
@@ -88,5 +89,6 @@ class StudentPayment {
     required this.amount,
     required this.allocations,
     required this.receiptNumber,
+    this.referenceNumber,
   });
 }
