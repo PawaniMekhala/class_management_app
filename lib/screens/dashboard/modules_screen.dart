@@ -25,6 +25,7 @@ import '../enrollment/enrollment_screen.dart';
 import '../payments/payments_screen.dart';
 import '../../providers/payment_provider.dart';
 import '../../providers/outstanding_provider.dart';
+import '../../providers/refund_provider.dart';
 
 class ModulesScreen extends StatelessWidget {
   const ModulesScreen({super.key});
@@ -227,11 +228,17 @@ class ModulesScreen extends StatelessWidget {
                       ChangeNotifierProvider<SelectedInstituteProvider>.value(
                         value: instituteProvider,
                       ),
+
                       ChangeNotifierProvider<PaymentProvider>(
                         create: (_) => PaymentProvider(),
                       ),
+
                       ChangeNotifierProvider<OutstandingProvider>(
                         create: (_) => OutstandingProvider(),
+                      ),
+
+                      ChangeNotifierProvider<RefundProvider>(
+                        create: (_) => RefundProvider(),
                       ),
                     ],
                     child: PaymentsScreen(instituteId: selectedInstituteId),

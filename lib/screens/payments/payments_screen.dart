@@ -9,6 +9,7 @@ import 'student_payment_details_screen.dart';
 import '../../providers/payment_provider.dart';
 import 'receipts_tab.dart';
 import 'outstanding_tab.dart';
+import 'refunds_tab.dart';
 
 class PaymentsScreen extends StatefulWidget {
   final int instituteId;
@@ -210,7 +211,7 @@ class _PaymentsScreenState extends State<PaymentsScreen>
                   ),
                   instituteId: widget.instituteId,
                 ),
-                const Center(child: Text('Refunds')),
+                RefundsTab(instituteId: widget.instituteId),
               ],
             ),
     );
