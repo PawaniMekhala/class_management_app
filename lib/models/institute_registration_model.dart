@@ -30,17 +30,17 @@ class InstituteRegistrationModel {
 
   Map<String, dynamic> toJson() {
     return {
-      'institute_name': instituteName,
-      'institute_email': instituteEmail,
-      'contact_number': contactNumber,
+      'instituteName': instituteName,
+      'email': instituteEmail,
+      'contactNo': contactNumber,
       'address': address,
-      'district': district,
-      'city': city,
-      'organization_name': organizationName,
-      'owner_name': ownerName,
-      'owner_email': ownerEmail,
-      'owner_mobile': ownerMobile,
-      'owner_nic': ownerNic,
+      'districtId': district,
+      'cityId': city,
+      'organizationName': organizationName,
+      'ownerFullName': ownerName,
+      'ownerEmail': ownerEmail,
+      'ownerMobile': ownerMobile,
+      'ownerNIC': ownerNic,
       'password': password,
     };
   }

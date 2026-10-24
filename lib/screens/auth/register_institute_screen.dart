@@ -4,6 +4,9 @@ import '../../core/services/institute_registration_service.dart';
 import '../../models/institute_registration_model.dart';
 import '../../widgets/dialogs/app_message_dialog.dart';
 import '../../widgets/buttons/primary_button.dart';
+import '../../core/services/location_service.dart';
+import '../../models/district_model.dart';
+import '../../models/city_model.dart';
 
 class RegisterInstituteScreen extends StatefulWidget {
   const RegisterInstituteScreen({super.key});
@@ -34,36 +37,210 @@ class _RegisterInstituteScreenState extends State<RegisterInstituteScreen> {
   String? _selectedDistrict;
   String? _selectedCity;
 
+  // Location API service
+  final LocationService _locationService = LocationService();
+
+  // Districts and cities returned by the backend
+  List<DistrictModel> _districts = [];
+  List<CityModel> _cities = [];
+
+  // Loading states
+  bool _isLoadingDistricts = false;
+  bool _isLoadingCities = false;
+
+  // Error messages
+  String? _districtError;
+  String? _cityError;
+
+  // Prevent outdated city responses from replacing newer results
+  int _cityRequestVersion = 0;
+
   bool _organizationExpanded = false;
   bool _showPassword = false;
   bool _showConfirmPassword = false;
   bool _isSubmitting = false;
 
+  // Load districts when the registration screen opens
+  @override
+  void initState() {
+    super.initState();
+
+    _loadDistricts();
+  }
+
+  // Get districts from the backend API
+  Future<void> _loadDistricts() async {
+    setState(() {
+      _isLoadingDistricts = true;
+      _districtError = null;
+    });
+
+    try {
+      final districts = await _locationService.getDistricts();
+
+      if (!mounted) return;
+
+      setState(() {
+        _districts = districts;
+      });
+    } catch (error) {
+      if (!mounted) return;
+
+      setState(() {
+        _districtError = 'Unable to load districts. Please try again.';
+      });
+
+      debugPrint('District loading failed: $error');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoadingDistricts = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _loadCities(String districtId) async {
+    final requestVersion = ++_cityRequestVersion;
+
+    setState(() {
+      _isLoadingCities = true;
+      _cityError = null;
+
+      // Clear previous district's cities
+      _cities = [];
+      _selectedCity = null;
+    });
+
+    try {
+      final cities = await _locationService.getCities(districtId);
+
+      if (!mounted ||
+          requestVersion != _cityRequestVersion ||
+          _selectedDistrict != districtId) {
+        return;
+      }
+
+      setState(() {
+        _cities = cities;
+      });
+    } catch (error) {
+      if (!mounted ||
+          requestVersion != _cityRequestVersion ||
+          _selectedDistrict != districtId) {
+        return;
+      }
+
+      setState(() {
+        _cityError = 'Unable to load cities. Please try again.';
+      });
+
+      debugPrint('City loading failed: $error');
+    } finally {
+      if (mounted && requestVersion == _cityRequestVersion) {
+        setState(() {
+          _isLoadingCities = false;
+        });
+      }
+    }
+  }
+
+  Widget _locationDropdown({
+    required String hint,
+    required IconData icon,
+    required String? value,
+    required List<DropdownMenuItem<String>> items,
+    required ValueChanged<String?>? onChanged,
+    bool isLoading = false,
+  }) {
+    return DropdownButtonFormField<String>(
+      key: ValueKey('$hint-${value ?? 'none'}'),
+      initialValue: value,
+      isExpanded: true,
+
+      decoration: InputDecoration(
+        hintText: isLoading ? 'Loading...' : hint,
+
+        hintStyle: const TextStyle(fontSize: 13, color: Color(0xFF929BB2)),
+
+        prefixIcon: Icon(icon, color: const Color(0xFF75809C), size: 20),
+
+        suffixIcon: isLoading
+            ? const Padding(
+                padding: EdgeInsets.all(14),
+                child: SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Color(0xFF3D5AFE),
+                  ),
+                ),
+              )
+            : null,
+
+        filled: true,
+        fillColor: Colors.white,
+
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: 14,
+        ),
+
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFFE2E5F0)),
+        ),
+
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFFE2E5F0)),
+        ),
+
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF3D5AFE)),
+        ),
+      ),
+
+      items: items,
+
+      onChanged: isLoading ? null : onChanged,
+
+      validator: (selectedValue) {
+        if (selectedValue == null || selectedValue.isEmpty) {
+          return 'Please select $hint';
+        }
+
+        return null;
+      },
+    );
+  }
   // TO DO: Replace these temporary lists with your location API
   // or a complete Sri Lankan district/city dataset.
-  final List<String> _districts = [
-    'Colombo',
-    'Gampaha',
-    'Kalutara',
-    'Kandy',
-    'Galle',
-    'Matara',
-    'Ratnapura',
-    'Kegalle',
-    'Kurunegala',
-  ];
+  // final List<String> _districts = [
+  //   'Colombo',
+  //   'Gampaha',
+  //   'Kalutara',
+  //   'Kandy',
+  //   'Galle',
+  //   'Matara',
+  //   'Ratnapura',
+  //   'Kegalle',
+  //   'Kurunegala',
+  // ];
 
-  final Map<String, List<String>> _cities = {
-    'Colombo': ['Colombo', 'Dehiwala', 'Maharagama'],
-    'Gampaha': ['Gampaha', 'Negombo', 'Ja-Ela'],
-    'Kalutara': ['Kalutara', 'Panadura'],
-    'Kandy': ['Kandy', 'Peradeniya'],
-    'Galle': ['Galle', 'Hikkaduwa'],
-    'Matara': ['Matara', 'Weligama'],
-    'Ratnapura': ['Ratnapura', 'Balangoda'],
-    'Kegalle': ['Kegalle', 'Mawanella'],
-    'Kurunegala': ['Kurunegala', 'Kuliyapitiya'],
-  };
+  // final Map<String, List<String>> _cities = {
+  //   'Colombo': ['Colombo', 'Dehiwala', 'Maharagama'],
+  //   'Gampaha': ['Gampaha', 'Negombo', 'Ja-Ela'],
+  //   'Kalutara': ['Kalutara', 'Panadura'],
+  //   'Kandy': ['Kandy', 'Peradeniya'],
+  //   'Galle': ['Galle', 'Hikkaduwa'],
+  //   'Matara': ['Matara', 'Weligama'],
+  //   'Ratnapura': ['Ratnapura', 'Balangoda'],
+  //   'Kegalle': ['Kegalle', 'Mawanella'],
+  //   'Kurunegala': ['Kurunegala', 'Kuliyapitiya'],
+  // };
 
   @override
   void dispose() {
@@ -182,28 +359,28 @@ class _RegisterInstituteScreenState extends State<RegisterInstituteScreen> {
     );
   }
 
-  Widget _dropdown({
-    required String hint,
-    required IconData icon,
-    required String? value,
-    required List<String> items,
-    required ValueChanged<String?> onChanged,
-  }) {
-    return DropdownButtonFormField<String>(
-      initialValue: value,
-      isExpanded: true,
-      decoration: _inputDecoration(hint, icon),
-      icon: const Icon(Icons.arrow_drop_down, color: Color(0xFF7E8AA8)),
-      items: items.map((item) {
-        return DropdownMenuItem(
-          value: item,
-          child: Text(item, style: const TextStyle(fontSize: 12)),
-        );
-      }).toList(),
-      onChanged: onChanged,
-      validator: (value) => value == null ? 'Please select $hint' : null,
-    );
-  }
+  // Widget _dropdown({
+  //   required String hint,
+  //   required IconData icon,
+  //   required String? value,
+  //   required List<String> items,
+  //   required ValueChanged<String?> onChanged,
+  // }) {
+  //   return DropdownButtonFormField<String>(
+  //     initialValue: value,
+  //     isExpanded: true,
+  //     decoration: _inputDecoration(hint, icon),
+  //     icon: const Icon(Icons.arrow_drop_down, color: Color(0xFF7E8AA8)),
+  //     items: items.map((item) {
+  //       return DropdownMenuItem(
+  //         value: item,
+  //         child: Text(item, style: const TextStyle(fontSize: 12)),
+  //       );
+  //     }).toList(),
+  //     onChanged: onChanged,
+  //     validator: (value) => value == null ? 'Please select $hint' : null,
+  //   );
+  // }
 
   Future<void> _registerInstitute() async {
     // Check every required field before calling the API.
@@ -246,37 +423,78 @@ class _RegisterInstituteScreenState extends State<RegisterInstituteScreen> {
       password: _passwordController.text,
     );
 
+    // setState(() => _isSubmitting = true);
+
+    // try {
+    //   // API INTEGRATION POINT:
+    //   // The service currently simulates registration.
+    //   final success = await _registrationService.registerInstitute(
+    //     registration,
+    //   );
+
+    //   if (!mounted) return;
+
+    //   if (success) {
+    //     await AppMessageDialog.show(
+    //       context,
+    //       title: 'Registration Successful',
+    //       message: 'Institute registered successfully.',
+    //       type: AppMessageType.success,
+    //     );
+
+    //     if (!mounted) return;
+
+    //     // Return to Sign In after successful registration.
+    //     Navigator.pop(context);
+    //   }
+    // } catch (error) {
+    //   if (!mounted) return;
+
+    //   await AppMessageDialog.show(
+    //     context,
+    //     title: 'Registration Failed',
+    //     message: 'Unable to register institute. Please try again.',
+    //     type: AppMessageType.error,
+    //   );
+    // } finally {
+    //   if (mounted) {
+    //     setState(() => _isSubmitting = false);
+    //   }
+    // }
+
+    if (_isSubmitting) return;
+
     setState(() => _isSubmitting = true);
 
     try {
-      // API INTEGRATION POINT:
-      // The service currently simulates registration.
-      final success = await _registrationService.registerInstitute(
-        registration,
-      );
+      final result = await _registrationService.registerInstitute(registration);
 
-      if (!mounted) return;
-
-      if (success) {
-        await AppMessageDialog.show(
-          context,
-          title: 'Registration Successful',
-          message: 'Institute registered successfully.',
-          type: AppMessageType.success,
-        );
-
-        if (!mounted) return;
-
-        // Return to Sign In after successful registration.
-        Navigator.pop(context);
-      }
-    } catch (error) {
       if (!mounted) return;
 
       await AppMessageDialog.show(
         context,
+        title: 'Registration Submitted',
+        message:
+            '${result.message}\n\n'
+            'Institute Code: ${result.instituteCode}\n'
+            'Username: ${result.username}\n'
+            'Status: ${result.status}',
+        type: AppMessageType.success,
+      );
+
+      if (!mounted) return;
+
+      // Return to the Sign In screen.
+      Navigator.pop(context);
+    } catch (error) {
+      if (!mounted) return;
+
+      final errorMessage = error.toString().replaceFirst('Exception: ', '');
+
+      await AppMessageDialog.show(
+        context,
         title: 'Registration Failed',
-        message: 'Unable to register institute. Please try again.',
+        message: errorMessage,
         type: AppMessageType.error,
       );
     } finally {
@@ -353,36 +571,142 @@ class _RegisterInstituteScreenState extends State<RegisterInstituteScreen> {
                     ),
                     const SizedBox(height: 10),
 
-                    _dropdown(
+                    // _dropdown(
+                    //   hint: 'District',
+                    //   icon: Icons.map_outlined,
+                    //   value: _selectedDistrict,
+                    //   items: _districts,
+                    //   onChanged: (value) {
+                    //     setState(() {
+                    //       _selectedDistrict = value;
+                    //       _selectedCity = null;
+                    //     });
+                    //   },
+                    // ),
+                    _locationDropdown(
                       hint: 'District',
                       icon: Icons.map_outlined,
                       value: _selectedDistrict,
-                      items: _districts,
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedDistrict = value;
-                          _selectedCity = null;
-                        });
-                      },
+                      isLoading: _isLoadingDistricts,
+
+                      items: _districts.map((district) {
+                        return DropdownMenuItem<String>(
+                          value: district.id,
+                          child: Text(
+                            district.name,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: Color(0xFF293B78),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+
+                      onChanged: _districtError != null
+                          ? null
+                          : (districtId) {
+                              if (districtId == null) return;
+
+                              setState(() {
+                                _selectedDistrict = districtId;
+                                _selectedCity = null;
+                                _cities = [];
+                              });
+
+                              _loadCities(districtId);
+                            },
                     ),
+                    if (_districtError != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 6),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                _districtError!,
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.redAccent,
+                                ),
+                              ),
+                            ),
+
+                            TextButton(
+                              onPressed: _loadDistricts,
+                              child: const Text('Retry'),
+                            ),
+                          ],
+                        ),
+                      ),
                     const SizedBox(height: 10),
 
-                    _dropdown(
+                    // _dropdown(
+                    //   hint: 'City / town',
+                    //   icon: Icons.location_city_outlined,
+                    //   value: _selectedCity,
+                    //   items: _selectedDistrict == null
+                    //       ? []
+                    //       : _cities[_selectedDistrict] ?? [],
+                    //   onChanged: _selectedDistrict == null
+                    //       ? (_) {}
+                    //       : (value) {
+                    //           setState(() {
+                    //             _selectedCity = value;
+                    //           });
+                    //         },
+                    // ),
+                    _locationDropdown(
                       hint: 'City / town',
                       icon: Icons.location_city_outlined,
                       value: _selectedCity,
-                      items: _selectedDistrict == null
-                          ? []
-                          : _cities[_selectedDistrict] ?? [],
-                      onChanged: _selectedDistrict == null
-                          ? (_) {}
-                          : (value) {
+                      isLoading: _isLoadingCities,
+
+                      items: _cities.map((city) {
+                        return DropdownMenuItem<String>(
+                          value: city.id,
+                          child: Text(
+                            city.name,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: Color(0xFF293B78),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+
+                      onChanged: _selectedDistrict == null || _cityError != null
+                          ? null
+                          : (cityId) {
                               setState(() {
-                                _selectedCity = value;
+                                _selectedCity = cityId;
                               });
                             },
                     ),
 
+                    if (_cityError != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 6),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                _cityError!,
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.redAccent,
+                                ),
+                              ),
+                            ),
+
+                            TextButton(
+                              onPressed: _selectedDistrict == null
+                                  ? null
+                                  : () => _loadCities(_selectedDistrict!),
+                              child: const Text('Retry'),
+                            ),
+                          ],
+                        ),
+                      ),
                     // Optional Organization section
                     const SizedBox(height: 14),
                     InkWell(
