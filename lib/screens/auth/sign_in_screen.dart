@@ -11,6 +11,8 @@ import '../../widgets/inputs/custom_text_field.dart';
 import 'select_institute_screen.dart';
 import 'register_institute_screen.dart';
 import 'change_password_screen.dart';
+import '../../core/services/auth_service.dart';
+import '../../core/services/token_storage_service.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -23,7 +25,11 @@ class _SignInScreenState extends State<SignInScreen> {
   final usernameController = TextEditingController();
   final passwordController = TextEditingController();
 
+  final AuthService _authService = AuthService();
+  final TokenStorageService _tokenStorageService = TokenStorageService();
+
   bool _obscurePassword = true;
+  bool _isLoggingIn = false;
 
   @override
   void dispose() {
@@ -35,6 +41,93 @@ class _SignInScreenState extends State<SignInScreen> {
   void _showMessage(String message) {
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  Future<void> _login() async {
+    if (_isLoggingIn) return;
+
+    final username = usernameController.text.trim();
+    final password = passwordController.text;
+
+    // Validate required fields
+    if (username.isEmpty || password.isEmpty) {
+      _showMessage('Please enter your username and password.');
+      return;
+    }
+
+    setState(() {
+      _isLoggingIn = true;
+    });
+
+    try {
+      // Call the real backend API
+      final result = await _authService.login(
+        username: username,
+        password: password,
+      );
+
+      debugPrint('LOGIN API SUCCESS');
+      debugPrint('Account-level login response parsed successfully');
+      debugPrint('Number of institutes: ${result.institutes.length}');
+      debugPrint('Must change password: ${result.mustChangePassword}');
+
+      if (!mounted) return;
+
+      // Save tokens securely
+      await _tokenStorageService.saveTokens(
+        accessToken: result.accessToken,
+        refreshToken: result.refreshToken,
+      );
+
+      if (!mounted) return;
+
+      // Password change must be handled before institute selection.
+      if (result.mustChangePassword) {
+        _showMessage(
+          'Your account requires a password change before continuing.',
+        );
+
+        // TO DO: Connect the authenticated password-change API flow.
+        return;
+      }
+
+      // The user must have at least one accessible institute.
+      if (result.institutes.isEmpty) {
+        _showMessage(
+          'No accessible institutes were returned for this account.',
+        );
+        return;
+      }
+
+      // Navigate to the existing Select Institute screen.
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => SelectInstituteScreen(
+            userName: result.fullName.isNotEmpty
+                ? result.fullName
+                : result.username,
+          ),
+        ),
+      );
+    } catch (error, stackTrace) {
+      debugPrint('========== SIGN IN ERROR ==========');
+      debugPrint('Error: $error');
+      debugPrintStack(stackTrace: stackTrace);
+      debugPrint('===================================');
+
+      if (!mounted) return;
+
+      final errorMessage = error.toString().replaceFirst('Exception: ', '');
+
+      _showMessage(errorMessage);
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoggingIn = false;
+        });
+      }
+    }
   }
 
   @override
@@ -170,30 +263,35 @@ class _SignInScreenState extends State<SignInScreen> {
                       const SizedBox(height: 16),
 
                       // Sign in
+                      // PrimaryButton(
+                      //   text: 'Sign in',
+                      //   onPressed: () {
+                      //     if (usernameController.text.trim().isEmpty ||
+                      //         passwordController.text.isEmpty) {
+                      //       _showMessage(
+                      //         'Please enter your username and password.',
+                      //       );
+                      //       return;
+                      //     }
+
+                      //     // _showMessage(
+                      //     //   'Authentication will be connected later.',
+                      //     // );
+                      //     // Temporary navigation until login API is connected
+                      //     Navigator.push(
+                      //       context,
+                      //       MaterialPageRoute(
+                      //         builder: (context) => const SelectInstituteScreen(
+                      //           userName: 'Kamala',
+                      //         ),
+                      //       ),
+                      //     );
+                      //   },
+                      // ),
                       PrimaryButton(
                         text: 'Sign in',
-                        onPressed: () {
-                          if (usernameController.text.trim().isEmpty ||
-                              passwordController.text.isEmpty) {
-                            _showMessage(
-                              'Please enter your username and password.',
-                            );
-                            return;
-                          }
-
-                          // _showMessage(
-                          //   'Authentication will be connected later.',
-                          // );
-                          // Temporary navigation until login API is connected
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const SelectInstituteScreen(
-                                userName: 'Kamala',
-                              ),
-                            ),
-                          );
-                        },
+                        isLoading: _isLoggingIn,
+                        onPressed: _login,
                       ),
 
                       const SizedBox(height: 10),
@@ -317,7 +415,7 @@ class _SignInScreenState extends State<SignInScreen> {
                           const SizedBox(width: 5),
                           Flexible(
                             child: Text(
-                              'Server: http://localhost:5196/',
+                              'Server: mcleapi.dtl.lk',
                               overflow: TextOverflow.ellipsis,
                               style: AppTextStyles.caption.copyWith(
                                 fontSize: 9,
