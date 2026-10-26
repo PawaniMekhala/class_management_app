@@ -26,6 +26,7 @@ import '../payments/payments_screen.dart';
 import '../../providers/payment_provider.dart';
 import '../../providers/outstanding_provider.dart';
 import '../../providers/refund_provider.dart';
+import '../attendance/attendance_screen.dart';
 
 class ModulesScreen extends StatelessWidget {
   const ModulesScreen({super.key});
@@ -193,7 +194,31 @@ class ModulesScreen extends StatelessWidget {
             description: 'QR check-in / check-out and attendance records.',
             icon: Icons.fact_check_outlined,
             onTap: () {
-              // TO DO: Open Attendance screen.
+              final instituteProvider = context
+                  .read<SelectedInstituteProvider>();
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => MultiProvider(
+                    providers: [
+                      ChangeNotifierProvider<SelectedInstituteProvider>.value(
+                        value: instituteProvider,
+                      ),
+                      ChangeNotifierProvider<StudentProvider>(
+                        create: (_) => StudentProvider(),
+                      ),
+                      ChangeNotifierProvider<ClassProvider>(
+                        create: (_) => ClassProvider(),
+                      ),
+                      ChangeNotifierProvider<EnrollmentProvider>(
+                        create: (_) => EnrollmentProvider(),
+                      ),
+                    ],
+                    child: const AttendanceScreen(),
+                  ),
+                ),
+              );
             },
           ),
 

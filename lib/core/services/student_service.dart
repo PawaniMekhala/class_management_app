@@ -20,7 +20,8 @@ class StudentService {
         studentCode: 'SIPGAM-ST0011',
         grade: 'Diploma',
         admittedAt: DateTime(2026, 9, 4, 11, 0),
-        photoUrl: 'https://example.com/photo.jpg',
+        photoUrl: 'https://images.pexels.com/photos/16333664/pexels-photo-16333664.jpeg?_gl=1*s0cth*_ga*MjkwNTUxOTY4LjE3OTI5NjkwNTE.*_ga_8JE65Q40S6*czE3OTI5NjkwNTAkbzEkZzEkdDE3OTI5NjkxNTkkajIwJGwwJGgw',
+        qrCode: 'STUDENT000001',
       ),
       StudentModel(
         id: 2,
@@ -30,6 +31,7 @@ class StudentService {
         grade: 'Diploma',
         admittedAt: DateTime(2026, 9, 4, 10, 0),
         photoUrl: 'https://example.com/photo.jpg',
+        qrCode: 'STUDENT000002',
       ),
       StudentModel(
         id: 3,
@@ -39,6 +41,7 @@ class StudentService {
         grade: 'Grade 13',
         admittedAt: DateTime(2026, 9, 4, 9, 0),
         photoUrl: 'https://example.com/photo.jpg',
+        qrCode: 'STUDENT000003',
       ),
       StudentModel(
         id: 4,
@@ -48,6 +51,7 @@ class StudentService {
         grade: 'Grade 12',
         admittedAt: DateTime(2026, 9, 4, 8, 0),
         photoUrl: 'https://example.com/photo.jpg',
+        qrCode: 'STUDENT000004',
       ),
       StudentModel(
         id: 5,
@@ -57,6 +61,7 @@ class StudentService {
         grade: 'Grade 10',
         admittedAt: DateTime(2026, 9, 4, 7, 0),
         photoUrl: 'https://example.com/photo.jpg',
+        qrCode: 'STUDENT000005',
       ),
       StudentModel(
         id: 6,
@@ -66,6 +71,7 @@ class StudentService {
         grade: 'Grade 12',
         admittedAt: DateTime(2026, 9, 4, 6, 0),
         photoUrl: 'https://example.com/photo.jpg',
+        qrCode: 'STUDENT000006',
       ),
       StudentModel(
         id: 7,
@@ -76,6 +82,7 @@ class StudentService {
         admittedAt: DateTime(2026, 9, 4, 5, 0),
         instituteCount: 2,
         photoUrl: 'https://example.com/photo.jpg',
+        qrCode: 'STUDENT000007',
       ),
       StudentModel(
         id: 8,
@@ -85,6 +92,7 @@ class StudentService {
         grade: 'Grade 10',
         admittedAt: DateTime(2026, 9, 4, 4, 0),
         photoUrl: 'https://example.com/photo.jpg',
+        qrCode: 'STUDENT000008',
       ),
       StudentModel(
         id: 9,
@@ -94,6 +102,7 @@ class StudentService {
         grade: 'Grade 12',
         admittedAt: DateTime(2026, 9, 4, 3, 0),
         photoUrl: 'https://example.com/photo.jpg',
+        qrCode: 'STUDENT000009',
       ),
       StudentModel(
         id: 10,
@@ -103,6 +112,7 @@ class StudentService {
         grade: 'Diploma',
         admittedAt: DateTime(2026, 9, 4, 11, 0),
         photoUrl: 'https://example.com/photo.jpg',
+        qrCode: 'STUDENT000010',
       ),
       StudentModel(
         id: 11,
@@ -112,6 +122,7 @@ class StudentService {
         grade: 'Diploma',
         admittedAt: DateTime(2026, 9, 4, 10, 0),
         photoUrl: 'https://example.com/photo.jpg',
+        qrCode: 'STUDENT000011',
       ),
       StudentModel(
         id: 12,
@@ -121,6 +132,7 @@ class StudentService {
         grade: 'Grade 13',
         admittedAt: DateTime(2026, 9, 4, 9, 0),
         photoUrl: 'https://example.com/photo.jpg',
+        qrCode: 'STUDENT000012',
       ),
       StudentModel(
         id: 13,
@@ -130,6 +142,7 @@ class StudentService {
         grade: 'Grade 12',
         admittedAt: DateTime(2026, 9, 4, 8, 0),
         photoUrl: 'https://example.com/photo.jpg',
+        qrCode: 'STUDENT000013',
       ),
       StudentModel(
         id: 14,
@@ -139,6 +152,7 @@ class StudentService {
         grade: 'Grade 10',
         admittedAt: DateTime(2026, 9, 4, 7, 0),
         photoUrl: 'https://example.com/photo.jpg',
+        qrCode: 'STUDENT000014',
       ),
       StudentModel(
         id: 15,
@@ -148,6 +162,7 @@ class StudentService {
         grade: 'Grade 12',
         admittedAt: DateTime(2026, 9, 4, 6, 0),
         photoUrl: 'https://example.com/photo.jpg',
+        qrCode: 'STUDENT000015',
       ),
     ];
 

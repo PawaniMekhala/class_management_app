@@ -13,17 +13,29 @@ class ClassService {
       maxStudents: 150,
       paymentPlanName: 'A/L monthly fee',
       startDate: DateTime(2026, 9, 1),
-      slots: const [
+      slots: [
         ClassSlot(
-          weekday: 3,
-          startTime: '16:00',
+          weekday: DateTime.monday,
+          startTime: '07:00',
           endTime: '18:00',
           hallId: 4,
           hallName: 'Main Hall',
         ),
+        // Temporary slot for attendance testing
+        ClassSlot(
+          weekday: DateTime.now().weekday,
+          startTime:
+              '${DateTime.now().hour.toString().padLeft(2, '0')}:'
+              '${DateTime.now().minute.toString().padLeft(2, '0')}',
+          endTime:
+              '${DateTime.now().add(const Duration(hours: 2)).hour.toString().padLeft(2, '0')}:'
+              '${DateTime.now().minute.toString().padLeft(2, '0')}',
+          hallId: 1,
+          hallName: 'Hall 1',
+        ),
         ClassSlot(
           weekday: 6,
-          startTime: '08:00',
+          startTime: '06:00',
           endTime: '12:00',
           hallId: 4,
           hallName: 'Main Hall',
@@ -32,17 +44,18 @@ class ClassService {
       teachers: const [ClassTeacher(id: 1, name: 'Prasad Wijesinghe')],
       students: const [
         ClassStudent(
-          id: 1,
+          id: 6,
           name: 'Kavindu Perera',
           studentCode: 'SIPGAM-ST0002',
           paymentPlan: 'A/L monthly fee',
           outstandingAmount: 1800,
         ),
         ClassStudent(
-          id: 2,
+          id: 7,
           name: 'Nethmi Silva',
           studentCode: 'SIPGAM-ST0001',
           paymentPlan: 'A/L monthly fee',
+          outstandingAmount: 2000,
         ),
       ],
     ),

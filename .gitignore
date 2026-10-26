@@ -46,3 +46,7 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+
+/lib/models/select_institute_response_model.dart
+/lib/core/services/select_institute_service.dart
