@@ -179,8 +179,9 @@ class _AcademicScreenState extends State<AcademicScreen>
     return Scaffold(
       backgroundColor: AppColors.profileBackground,
       appBar: AppBar(
-        automaticallyImplyLeading: false,
+        // automaticallyImplyLeading: false,
         backgroundColor: AppColors.profileBackground,
+        foregroundColor: AppColors.authHeading,
         elevation: 0,
         title: const Text(
           'Academic',

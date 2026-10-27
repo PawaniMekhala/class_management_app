@@ -129,8 +129,9 @@ class _EnrollmentScreenState extends State<EnrollmentScreen> {
     return Scaffold(
       backgroundColor: AppColors.profileBackground,
       appBar: AppBar(
-        automaticallyImplyLeading: false,
+        // automaticallyImplyLeading: false,
         backgroundColor: AppColors.profileBackground,
+        foregroundColor: AppColors.authHeading,
         title: const Text(
           'Enrollment',
           style: TextStyle(

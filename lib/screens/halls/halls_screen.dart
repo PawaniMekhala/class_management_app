@@ -88,7 +88,7 @@ class _HallsScreenState extends State<HallsScreen> {
         backgroundColor: AppColors.profileBackground,
         foregroundColor: AppColors.authHeading,
         elevation: 0,
-        automaticallyImplyLeading: false,
+        // automaticallyImplyLeading: false,
         title: const Text(
           'Halls',
           style: TextStyle(

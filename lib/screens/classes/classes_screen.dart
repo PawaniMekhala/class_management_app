@@ -226,8 +226,9 @@ class _ClassesScreenState extends State<ClassesScreen>
     return Scaffold(
       backgroundColor: AppColors.profileBackground,
       appBar: AppBar(
-        automaticallyImplyLeading: false,
+        // automaticallyImplyLeading: false,
         backgroundColor: AppColors.profileBackground,
+        foregroundColor: AppColors.authHeading,
         title: const Text(
           'Classes',
           style: TextStyle(
