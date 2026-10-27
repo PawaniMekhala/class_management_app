@@ -27,6 +27,7 @@ import '../../providers/payment_provider.dart';
 import '../../providers/outstanding_provider.dart';
 import '../../providers/refund_provider.dart';
 import '../attendance/attendance_screen.dart';
+import '../../providers/attendance_provider.dart';
 
 class ModulesScreen extends StatelessWidget {
   const ModulesScreen({super.key});
@@ -213,6 +214,9 @@ class ModulesScreen extends StatelessWidget {
                       ),
                       ChangeNotifierProvider<EnrollmentProvider>(
                         create: (_) => EnrollmentProvider(),
+                      ),
+                      ChangeNotifierProvider<AttendanceProvider>(
+                        create: (_) => AttendanceProvider(),
                       ),
                     ],
                     child: const AttendanceScreen(),

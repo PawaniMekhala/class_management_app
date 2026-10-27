@@ -6,6 +6,8 @@ import '../../providers/student_provider.dart';
 import '../../models/class_model.dart';
 import '../../providers/class_provider.dart';
 import '../../providers/enrollment_provider.dart';
+import 'session_roster_screen.dart';
+import '../../providers/attendance_provider.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../widgets/common/qr_scan_button.dart';
@@ -23,6 +25,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   StudentModel? _selectedStudent;
   String? _studentSearchError;
   InstituteClass? _selectedClass;
+  DateTime _selectedDate = DateTime.now();
 
   final TextEditingController _qrController = TextEditingController();
 
@@ -131,6 +134,51 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     }).toList();
   }
 
+  List<({InstituteClass classItem, ClassSlot slot})>
+  _getScheduledClassesForDate(DateTime date) {
+    final classes = context.read<ClassProvider>().allClasses;
+
+    final scheduledClasses = <({InstituteClass classItem, ClassSlot slot})>[];
+
+    for (final classItem in classes) {
+      final selectedDay = DateTime(date.year, date.month, date.day);
+
+      final classStartDate = DateTime(
+        classItem.startDate.year,
+        classItem.startDate.month,
+        classItem.startDate.day,
+      );
+
+      if (selectedDay.isBefore(classStartDate)) {
+        continue;
+      }
+
+      if (classItem.endDate != null) {
+        final classEndDate = DateTime(
+          classItem.endDate!.year,
+          classItem.endDate!.month,
+          classItem.endDate!.day,
+        );
+
+        if (selectedDay.isAfter(classEndDate)) {
+          continue;
+        }
+      }
+
+      for (final slot in classItem.slots) {
+        if (slot.weekday == selectedDay.weekday) {
+          scheduledClasses.add((classItem: classItem, slot: slot));
+        }
+      }
+    }
+
+    scheduledClasses.sort(
+      (a, b) => a.slot.startTime.compareTo(b.slot.startTime),
+    );
+
+    return scheduledClasses;
+  }
+
   bool _isClassEligible(InstituteClass classItem) {
     final now = DateTime.now();
 
@@ -165,6 +213,61 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     }
 
     return false;
+  }
+
+  String _formatSelectedDate(DateTime date) {
+    const weekdays = [
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+      'Sunday',
+    ];
+
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+
+    final today = DateTime.now();
+
+    final isToday =
+        date.year == today.year &&
+        date.month == today.month &&
+        date.day == today.day;
+
+    final formattedDate =
+        '${weekdays[date.weekday - 1]}, ${date.day} ${months[date.month - 1]} ${date.year}';
+
+    return isToday ? '$formattedDate · Today' : formattedDate;
+  }
+
+  String _formatClassTime(String time) {
+    final parts = time.split(':');
+
+    if (parts.length != 2) return time;
+
+    final hour = int.tryParse(parts[0]);
+    final minute = int.tryParse(parts[1]);
+
+    if (hour == null || minute == null) return time;
+
+    final period = hour >= 12 ? 'PM' : 'AM';
+    final displayHour = hour % 12 == 0 ? 12 : hour % 12;
+
+    return '$displayHour:${minute.toString().padLeft(2, '0')} $period';
   }
 
   Widget _buildTab({required String title, required int index}) {
@@ -466,11 +569,172 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   }
 
   Widget _buildClassesTab() {
-    return const Center(
-      child: Text(
-        'Classes attendance will be implemented next.',
-        style: TextStyle(fontSize: 13, color: AppColors.authIcon),
-      ),
+    return Consumer<ClassProvider>(
+      builder: (context, classProvider, child) {
+        final scheduledClasses = _getScheduledClassesForDate(_selectedDate);
+
+        return Column(
+          children: [
+            // Date navigation
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(
+                      Icons.chevron_left,
+                      color: AppColors.primary,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _selectedDate = _selectedDate.subtract(
+                          const Duration(days: 1),
+                        );
+                      });
+                    },
+                  ),
+
+                  Expanded(
+                    child: Text(
+                      _formatSelectedDate(_selectedDate),
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ),
+
+                  IconButton(
+                    icon: const Icon(
+                      Icons.chevron_right,
+                      color: AppColors.primary,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _selectedDate = _selectedDate.add(
+                          const Duration(days: 1),
+                        );
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ),
+
+            const Divider(height: 1, color: AppColors.profileDivider),
+
+            // Scheduled classes
+            Expanded(
+              child: classProvider.isLoading
+                  ? const Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.primary,
+                      ),
+                    )
+                  : classProvider.errorMessage != null
+                  ? Center(child: Text(classProvider.errorMessage!))
+                  : scheduledClasses.isEmpty
+                  ? const Center(
+                      child: Text(
+                        'No classes scheduled for this date.',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: AppColors.authIcon,
+                        ),
+                      ),
+                    )
+                  : ListView.separated(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: scheduledClasses.length,
+                      separatorBuilder: (_, _) => const SizedBox(height: 10),
+                      itemBuilder: (context, index) {
+                        final session = scheduledClasses[index];
+
+                        final classItem = session.classItem;
+                        final slot = session.slot;
+
+                        final teacherName = classItem.teachers.isNotEmpty
+                            ? classItem.teachers.first.name
+                            : 'No teacher assigned';
+
+                        return Material(
+                          color: AppColors.surface,
+                          borderRadius: BorderRadius.circular(12),
+                          clipBehavior: Clip.antiAlias,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: AppColors.profileDivider,
+                              ),
+                            ),
+                            child: ListTile(
+                              leading: const CircleAvatar(
+                                backgroundColor: Color(0xFFE3E7FF),
+                                child: Icon(
+                                  Icons.access_time,
+                                  color: AppColors.primary,
+                                  size: 20,
+                                ),
+                              ),
+                              title: Text(
+                                classItem.name,
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              subtitle: Padding(
+                                padding: const EdgeInsets.only(top: 5),
+                                child: Text(
+                                  '${_formatClassTime(slot.startTime)}'
+                                  ' – ${_formatClassTime(slot.endTime)}'
+                                  ' · ${slot.hallName}'
+                                  ' · $teacherName'
+                                  ' · ${classItem.enrolledCount} enrolled',
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    color: AppColors.authIcon,
+                                  ),
+                                ),
+                              ),
+                              trailing: const Icon(
+                                Icons.chevron_right,
+                                size: 18,
+                                color: AppColors.authIcon,
+                              ),
+                              onTap: () {
+                                final attendanceProvider = context
+                                    .read<AttendanceProvider>();
+
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        ChangeNotifierProvider<
+                                          AttendanceProvider
+                                        >.value(
+                                          value: attendanceProvider,
+                                          child: SessionRosterScreen(
+                                            classItem: classItem,
+                                            slot: slot,
+                                            sessionDate: _selectedDate,
+                                          ),
+                                        ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
