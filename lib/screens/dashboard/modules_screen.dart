@@ -28,6 +28,8 @@ import '../../providers/outstanding_provider.dart';
 import '../../providers/refund_provider.dart';
 import '../attendance/attendance_screen.dart';
 import '../../providers/attendance_provider.dart';
+import '../tutes/tutes_screen.dart';
+import '../../providers/tute_provider.dart';
 
 class ModulesScreen extends StatelessWidget {
   const ModulesScreen({super.key});
@@ -283,7 +285,15 @@ class ModulesScreen extends StatelessWidget {
             description: 'Tutes and learning materials, distribution.',
             icon: Icons.menu_book_outlined,
             onTap: () {
-              // TO DO: Open Tutes screen.
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ChangeNotifierProvider(
+                    create: (_) => TuteProvider(),
+                    child: const TutesScreen(),
+                  ),
+                ),
+              );
             },
           ),
 
