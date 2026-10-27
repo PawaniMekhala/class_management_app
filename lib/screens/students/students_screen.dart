@@ -218,12 +218,13 @@ class _StudentsScreenState extends State<StudentsScreen>
 
       appBar: AppBar(
         backgroundColor: AppColors.profileBackground,
+        foregroundColor: AppColors.authHeading,
         elevation: 0,
-        automaticallyImplyLeading: false,
+        // automaticallyImplyLeading: false,
         title: const Text(
           'Students',
           style: TextStyle(
-            color: AppColors.authHeading,
+            // color: AppColors.authHeading,
             fontSize: 18,
             fontWeight: FontWeight.w600,
           ),

@@ -75,11 +75,12 @@ class _TeachersScreenState extends State<TeachersScreen> {
       appBar: AppBar(
         backgroundColor: AppColors.profileBackground,
         elevation: 0,
-        automaticallyImplyLeading: false,
+        // automaticallyImplyLeading: false,
+        foregroundColor: AppColors.authHeading,
         title: const Text(
           'Teachers',
           style: TextStyle(
-            color: AppColors.authHeading,
+            // color: AppColors.authHeading,
             fontSize: 18,
             fontWeight: FontWeight.w600,
           ),

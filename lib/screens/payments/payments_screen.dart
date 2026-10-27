@@ -176,9 +176,10 @@ class _PaymentsScreenState extends State<PaymentsScreen>
       appBar: AppBar(
         backgroundColor: AppColors.profileBackground,
         foregroundColor: AppColors.authHeading,
+        elevation: 0,
         title: const Text(
           'Payments',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
         ),
         bottom: TabBar(
           controller: _tabController,
