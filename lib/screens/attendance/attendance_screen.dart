@@ -8,7 +8,7 @@ import '../../providers/class_provider.dart';
 import '../../providers/enrollment_provider.dart';
 import 'session_roster_screen.dart';
 import '../../providers/attendance_provider.dart';
-
+import '../../models/attendance_model.dart';
 import '../../core/theme/app_colors.dart';
 import '../../widgets/common/qr_scan_button.dart';
 
@@ -25,6 +25,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   StudentModel? _selectedStudent;
   String? _studentSearchError;
   InstituteClass? _selectedClass;
+  ClassSlot? _selectedSlot;
   DateTime _selectedDate = DateTime.now();
 
   final TextEditingController _qrController = TextEditingController();
@@ -51,6 +52,16 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     super.dispose();
   }
 
+  void _clearSelectedStudent() {
+    setState(() {
+      _selectedStudent = null;
+      _selectedClass = null;
+      _selectedSlot = null;
+      _studentSearchError = null;
+      _qrController.clear();
+    });
+  }
+
   void _searchStudent(String value) {
     final searchValue = value.trim().toLowerCase();
 
@@ -73,13 +84,134 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     });
   }
 
+  Future<void> _confirmStudentEntry() async {
+    final student = _selectedStudent;
+    final classItem = _selectedClass;
+    final slot = _selectedSlot;
+
+    // Make sure the admin selected a student and class session.
+    if (student == null || classItem == null || slot == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select an eligible class first.')),
+      );
+      return;
+    }
+
+    // Check the session is still eligible at confirmation time.
+    final isStillEligible = _getEligibleSessions().any(
+      (session) =>
+          session.classItem.id == classItem.id &&
+          session.slot.startTime == slot.startTime &&
+          session.slot.hallId == slot.hallId,
+    );
+
+    if (!isStillEligible) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('This class session is no longer eligible.'),
+        ),
+      );
+      return;
+    }
+
+    final attendanceProvider = context.read<AttendanceProvider>();
+
+    // Prevent duplicate attendance.
+    final existingRecords = attendanceProvider.getSessionRecords(
+      instituteId: classItem.instituteId,
+      classId: classItem.id,
+      date: DateTime.now(),
+      startTime: slot.startTime,
+    );
+
+    final alreadyRecorded = existingRecords.any(
+      (record) => record.studentId == student.id,
+    );
+
+    if (alreadyRecorded) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Attendance has already been recorded for this student.',
+          ),
+        ),
+      );
+      return;
+    }
+
+    // Ask for confirmation before recording attendance.
+    final shouldConfirm = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Confirm Student Entry'),
+        content: Text(
+          'Student: ${student.name}\n'
+          'Class: ${classItem.name}\n'
+          'Time: ${_formatClassTime(slot.startTime)}'
+          ' – ${_formatClassTime(slot.endTime)}\n\n'
+          'Mark this student as entered?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Confirm Entry'),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldConfirm != true || !mounted) return;
+
+    try {
+      final record = AttendanceRecord(
+        instituteId: classItem.instituteId,
+        classId: classItem.id,
+        studentId: student.id,
+        sessionDate: DateTime.now(),
+        sessionStartTime: slot.startTime,
+      );
+
+      await attendanceProvider.checkIn(record);
+
+      if (!mounted) return;
+
+      setState(() {
+        _selectedClass = null;
+        _selectedSlot = null;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '${student.name} successfully entered ${classItem.name}.',
+          ),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Unable to record attendance: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.authBackground,
+      backgroundColor: AppColors.profileBackground,
       appBar: AppBar(
-        backgroundColor: AppColors.authBackground,
-        elevation: 0,
+        backgroundColor: AppColors.profileBackground,
+        foregroundColor: AppColors.authHeading,
+        // elevation: 0,
         title: const Text(
           'Attendance',
           style: TextStyle(
@@ -109,29 +241,111 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     );
   }
 
-  List<InstituteClass> _getEnrolledClasses() {
+  // List<InstituteClass> _getEnrolledClasses() {
+  //   if (_selectedStudent == null) return [];
+
+  //   final classProvider = context.read<ClassProvider>();
+  //   final enrollmentProvider = context.read<EnrollmentProvider>();
+
+  //   final studentEnrollments = enrollmentProvider.enrollments.where(
+  //     (enrollment) =>
+  //         enrollment.studentId == _selectedStudent!.id &&
+  //         enrollment.status == 'enrolled',
+  //   );
+
+  //   final enrolledClassIds = studentEnrollments
+  //       .map((enrollment) => enrollment.classId)
+  //       .toSet();
+
+  //   return classProvider.allClasses.where((classItem) {
+  //     final isEnrolled = enrolledClassIds.contains(classItem.id);
+
+  //     final isEligible = _isClassEligible(classItem);
+
+  //     return isEnrolled && isEligible;
+  //   }).toList();
+  // }
+
+  List<({InstituteClass classItem, ClassSlot slot})> _getEligibleSessions() {
     if (_selectedStudent == null) return [];
 
-    final classProvider = context.read<ClassProvider>();
+    // final classProvider = context.read<ClassProvider>();
     final enrollmentProvider = context.read<EnrollmentProvider>();
+    final attendanceProvider = context.read<AttendanceProvider>();
 
-    final studentEnrollments = enrollmentProvider.enrollments.where(
-      (enrollment) =>
-          enrollment.studentId == _selectedStudent!.id &&
-          enrollment.status == 'enrolled',
-    );
+    final now = DateTime.now();
 
-    final enrolledClassIds = studentEnrollments
+    // Find classes in which the selected student is enrolled.
+    final enrolledClassIds = enrollmentProvider.enrollments
+        .where(
+          (enrollment) =>
+              enrollment.studentId == _selectedStudent!.id &&
+              enrollment.status == 'enrolled',
+        )
         .map((enrollment) => enrollment.classId)
         .toSet();
 
-    return classProvider.allClasses.where((classItem) {
-      final isEnrolled = enrolledClassIds.contains(classItem.id);
+    final eligibleSessions = <({InstituteClass classItem, ClassSlot slot})>[];
 
-      final isEligible = _isClassEligible(classItem);
+    // Reuse the existing schedule method from the Classes tab.
+    final todaySessions = _getScheduledClassesForDate(now);
 
-      return isEnrolled && isEligible;
-    }).toList();
+    for (final session in todaySessions) {
+      final classItem = session.classItem;
+      final slot = session.slot;
+
+      // 1. Student must be enrolled.
+      if (!enrolledClassIds.contains(classItem.id)) {
+        continue;
+      }
+
+      // 2. Validate the scheduled start time.
+      final parts = slot.startTime.split(':');
+
+      if (parts.length != 2) continue;
+
+      final hour = int.tryParse(parts[0]);
+      final minute = int.tryParse(parts[1]);
+
+      if (hour == null ||
+          minute == null ||
+          hour < 0 ||
+          hour > 23 ||
+          minute < 0 ||
+          minute > 59) {
+        continue;
+      }
+
+      final classStart = DateTime(now.year, now.month, now.day, hour, minute);
+
+      // 3. Apply the approved ±1-hour entry window.
+      final allowedStart = classStart.subtract(const Duration(hours: 1));
+
+      final allowedEnd = classStart.add(const Duration(hours: 1));
+
+      final isWithinWindow =
+          !now.isBefore(allowedStart) && !now.isAfter(allowedEnd);
+
+      if (!isWithinWindow) {
+        continue;
+      }
+
+      // 4. Exclude completed sessions.
+      final isEnded = attendanceProvider.isSessionEnded(
+        instituteId: classItem.instituteId,
+        classId: classItem.id,
+        date: now,
+        startTime: slot.startTime,
+      );
+
+      if (isEnded) {
+        continue;
+      }
+
+      eligibleSessions.add(session);
+    }
+
+    return eligibleSessions;
   }
 
   List<({InstituteClass classItem, ClassSlot slot})>
@@ -179,41 +393,41 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     return scheduledClasses;
   }
 
-  bool _isClassEligible(InstituteClass classItem) {
-    final now = DateTime.now();
+  // bool _isClassEligible(InstituteClass classItem) {
+  //   final now = DateTime.now();
 
-    for (final slot in classItem.slots) {
-      // Check whether the class is scheduled for today.
-      if (slot.weekday != now.weekday) {
-        continue;
-      }
+  //   for (final slot in classItem.slots) {
+  //     // Check whether the class is scheduled for today.
+  //     if (slot.weekday != now.weekday) {
+  //       continue;
+  //     }
 
-      final parts = slot.startTime.split(':');
+  //     final parts = slot.startTime.split(':');
 
-      if (parts.length != 2) {
-        continue;
-      }
+  //     if (parts.length != 2) {
+  //       continue;
+  //     }
 
-      final hour = int.tryParse(parts[0]);
-      final minute = int.tryParse(parts[1]);
+  //     final hour = int.tryParse(parts[0]);
+  //     final minute = int.tryParse(parts[1]);
 
-      if (hour == null || minute == null) {
-        continue;
-      }
+  //     if (hour == null || minute == null) {
+  //       continue;
+  //     }
 
-      final classStart = DateTime(now.year, now.month, now.day, hour, minute);
+  //     final classStart = DateTime(now.year, now.month, now.day, hour, minute);
 
-      final allowedStart = classStart.subtract(const Duration(hours: 1));
+  //     final allowedStart = classStart.subtract(const Duration(hours: 1));
 
-      final allowedEnd = classStart.add(const Duration(hours: 1));
+  //     final allowedEnd = classStart.add(const Duration(hours: 1));
 
-      if (!now.isBefore(allowedStart) && !now.isAfter(allowedEnd)) {
-        return true;
-      }
-    }
+  //     if (!now.isBefore(allowedStart) && !now.isAfter(allowedEnd)) {
+  //       return true;
+  //     }
+  //   }
 
-    return false;
-  }
+  //   return false;
+  // }
 
   String _formatSelectedDate(DateTime date) {
     const weekdays = [
@@ -330,10 +544,13 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                           icon: Icons.check,
                           isSelected: _isEntry,
                           onTap: () {
+                            if (_isEntry) return;
+
                             setState(() {
                               _isEntry = true;
-                              _qrController.clear();
                             });
+
+                            _clearSelectedStudent();
                           },
                         ),
                       ),
@@ -343,10 +560,13 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                           icon: Icons.logout,
                           isSelected: !_isEntry,
                           onTap: () {
+                            if (!_isEntry) return;
+
                             setState(() {
                               _isEntry = false;
-                              _qrController.clear();
                             });
+
+                            _clearSelectedStudent();
                           },
                         ),
                       ),
@@ -452,6 +672,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                 border: Border.all(color: AppColors.profileDivider),
               ),
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const CircleAvatar(radius: 24, child: Icon(Icons.person)),
                   const SizedBox(width: 12),
@@ -459,6 +680,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // Student name
                         Text(
                           _selectedStudent!.name,
                           style: const TextStyle(
@@ -467,12 +689,101 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                           ),
                         ),
                         const SizedBox(height: 4),
+
+                        // Student code and grade
                         Text(_selectedStudent!.studentCode),
                         Text(_selectedStudent!.grade),
+
                         const SizedBox(height: 6),
+
+                        //  Active / Inactive Attendance Status widget
+                        Consumer<AttendanceProvider>(
+                          builder: (context, attendanceProvider, child) {
+                            final activeAttendance = attendanceProvider
+                                .getActiveAttendance(
+                                  instituteId: _selectedStudent!.instituteId,
+                                  studentId: _selectedStudent!.id,
+                                );
+
+                            final isActive = activeAttendance != null;
+
+                            return Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 5,
+                              ),
+                              decoration: BoxDecoration(
+                                color: isActive
+                                    ? const Color(0xFFE8F5E9)
+                                    : const Color(0xFFF5F5F5),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                isActive ? 'Active' : 'Inactive',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: isActive
+                                      ? Colors.green
+                                      : AppColors.authIcon,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+
+                        // ADD ENROLLED CLASSES HERE
+                        const SizedBox(height: 12),
+
                         const Text(
-                          'Attendance: Inactive',
-                          style: TextStyle(color: AppColors.authIcon),
+                          'Enrolled Classes',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.authHeading,
+                          ),
+                        ),
+
+                        const SizedBox(height: 5),
+
+                        Consumer<EnrollmentProvider>(
+                          builder: (context, enrollmentProvider, child) {
+                            final studentEnrollments = enrollmentProvider
+                                .enrollments
+                                .where(
+                                  (enrollment) =>
+                                      enrollment.studentId ==
+                                          _selectedStudent!.id &&
+                                      enrollment.status == 'enrolled',
+                                )
+                                .toList();
+
+                            if (studentEnrollments.isEmpty) {
+                              return const Text(
+                                'No enrolled classes found.',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: AppColors.authIcon,
+                                ),
+                              );
+                            }
+
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: studentEnrollments.map((enrollment) {
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 5),
+                                  child: Text(
+                                    '• ${enrollment.className}',
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      color: AppColors.authIcon,
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                            );
+                          },
                         ),
                       ],
                     ),
@@ -480,7 +791,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                 ],
               ),
             ),
-
             const SizedBox(height: 20),
 
             // Enrolled and available classes
@@ -491,40 +801,166 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
             const SizedBox(height: 10),
 
-            if (_getEnrolledClasses().isEmpty)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 12),
-                child: Text(
-                  'No classes available for attendance at this time.',
-                  style: TextStyle(fontSize: 13, color: AppColors.authIcon),
-                ),
-              )
-            else
-              ..._getEnrolledClasses().map(
-                (classItem) => Card(
-                  margin: const EdgeInsets.only(bottom: 10),
-                  child: ListTile(
-                    // title: Text(classItem.name),
-                    // subtitle: Text('${classItem.subject} • ${classItem.grade}'),
-                    // trailing: const Icon(Icons.chevron_right),
-                    onTap: () {
-                      setState(() {
-                        _selectedClass = classItem;
-                      });
-                    },
-                    title: Text(classItem.name),
-                    subtitle: Text('${classItem.subject} • ${classItem.grade}'),
-                    trailing: Icon(
-                      _selectedClass?.id == classItem.id
-                          ? Icons.check_circle
-                          : Icons.chevron_right,
-                      color: _selectedClass?.id == classItem.id
-                          ? AppColors.primary
-                          : AppColors.authIcon,
+            // if (_getEnrolledClasses().isEmpty)
+            //   const Padding(
+            //     padding: EdgeInsets.symmetric(vertical: 12),
+            //     child: Text(
+            //       'No classes available for attendance at this time.',
+            //       style: TextStyle(fontSize: 13, color: AppColors.authIcon),
+            //     ),
+            //   )
+            // else
+            //   ..._getEnrolledClasses().map(
+            //     (classItem) => Card(
+            //       margin: const EdgeInsets.only(bottom: 10),
+            //       child: ListTile(
+            //         // title: Text(classItem.name),
+            //         // subtitle: Text('${classItem.subject} • ${classItem.grade}'),
+            //         // trailing: const Icon(Icons.chevron_right),
+            //         onTap: () {
+            //           setState(() {
+            //             _selectedClass = classItem;
+            //           });
+            //         },
+            //         title: Text(classItem.name),
+            //         subtitle: Text('${classItem.subject} • ${classItem.grade}'),
+            //         trailing: Icon(
+            //           _selectedClass?.id == classItem.id
+            //               ? Icons.check_circle
+            //               : Icons.chevron_right,
+            //           color: _selectedClass?.id == classItem.id
+            //               ? AppColors.primary
+            //               : AppColors.authIcon,
+            //         ),
+            //       ),
+            //     ),
+            //   ),
+            Consumer<AttendanceProvider>(
+              builder: (context, attendanceProvider, child) {
+                final eligibleSessions = _getEligibleSessions();
+
+                if (eligibleSessions.isEmpty) {
+                  return Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFEBEE),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Row(
+                      children: [
+                        Icon(Icons.info_outline, color: Colors.red),
+                        SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            'No eligible classes available at this time.',
+                            style: TextStyle(fontSize: 12, color: Colors.red),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                return Column(
+                  children: eligibleSessions.map((session) {
+                    final classItem = session.classItem;
+                    final slot = session.slot;
+
+                    final isSelected =
+                        _selectedClass?.id == classItem.id &&
+                        _selectedSlot?.startTime == slot.startTime &&
+                        _selectedSlot?.hallId == slot.hallId;
+
+                    return Card(
+                      margin: const EdgeInsets.only(bottom: 10),
+                      color: isSelected
+                          ? const Color(0xFFE8ECFF)
+                          : AppColors.surface,
+                      child: ListTile(
+                        onTap: () {
+                          setState(() {
+                            _selectedClass = classItem;
+                            _selectedSlot = slot;
+                          });
+                        },
+                        leading: Icon(
+                          isSelected
+                              ? Icons.check_circle
+                              : Icons.radio_button_unchecked,
+                          color: isSelected
+                              ? AppColors.primary
+                              : AppColors.authIcon,
+                        ),
+                        title: Text(
+                          classItem.name,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        subtitle: Text(
+                          '${_formatClassTime(slot.startTime)}'
+                          ' – ${_formatClassTime(slot.endTime)}'
+                          '\n${slot.hallName}',
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: AppColors.authIcon,
+                          ),
+                        ),
+                        isThreeLine: true,
+                        trailing: isSelected
+                            ? const Icon(
+                                Icons.check_circle,
+                                color: AppColors.primary,
+                              )
+                            : const Icon(
+                                Icons.chevron_right,
+                                color: AppColors.authIcon,
+                              ),
+                      ),
+                    );
+                  }).toList(),
+                );
+              },
+            ),
+
+            // CONFIRM ENTRY BUTTON HERE
+            if (_isEntry &&
+                _selectedClass != null &&
+                _selectedSlot != null) ...[
+              const SizedBox(height: 16),
+
+              SizedBox(
+                width: double.infinity,
+                height: 44,
+                child: ElevatedButton.icon(
+                  onPressed: _confirmStudentEntry,
+                  icon: const Icon(Icons.login),
+                  label: const Text('Confirm Entry'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
                     ),
                   ),
                 ),
               ),
+            ],
+
+            // CANCEL/ NEXT STUDENT BUTTON HERE
+            const SizedBox(height: 16),
+
+            Center(
+              child: TextButton(
+                onPressed: _clearSelectedStudent,
+                child: const Text(
+                  'Cancel / Next Student',
+                  style: TextStyle(color: AppColors.primary, fontSize: 12),
+                ),
+              ),
+            ),
           ],
         ],
       ),

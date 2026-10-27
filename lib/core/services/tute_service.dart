@@ -89,6 +89,15 @@ class TuteService {
 
   // Shared dummy distribution records.
   static final List<TuteDistributionModel> _distributions = [
+    // for (int tuteId = 101; tuteId <= 104; tuteId++)
+    //   for (final studentId in [6, 7])
+    //     TuteDistributionModel(
+    //       id: (tuteId - 101) * 2 + (studentId - 6) + 1,
+    //       instituteId: 1,
+    //       tuteId: tuteId,
+    //       studentId: studentId,
+    //       receivedAt: DateTime(2026, 10, 25),
+    //     ),
     TuteDistributionModel(
       id: 1,
       instituteId: 1,
@@ -99,7 +108,21 @@ class TuteService {
     TuteDistributionModel(
       id: 2,
       instituteId: 1,
-      tuteId: 102,
+      tuteId: 104,
+      studentId: 6,
+      receivedAt: DateTime(2026, 10, 8),
+    ),
+    TuteDistributionModel(
+      id: 3,
+      instituteId: 1,
+      tuteId: 104,
+      studentId: 15,
+      receivedAt: DateTime(2026, 10, 8),
+    ),
+    TuteDistributionModel(
+      id: 4,
+      instituteId: 1,
+      tuteId: 105,
       studentId: 6,
       receivedAt: DateTime(2026, 10, 8),
     ),

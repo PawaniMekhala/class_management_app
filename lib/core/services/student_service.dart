@@ -21,7 +21,7 @@ class StudentService {
         grade: 'Diploma',
         admittedAt: DateTime(2026, 9, 4, 11, 0),
         photoUrl: 'https://images.pexels.com/photos/16333664/pexels-photo-16333664.jpeg?_gl=1*s0cth*_ga*MjkwNTUxOTY4LjE3OTI5NjkwNTE.*_ga_8JE65Q40S6*czE3OTI5NjkwNTAkbzEkZzEkdDE3OTI5NjkxNTkkajIwJGwwJGgw',
-        qrCode: 'STUDENT000001',
+        qrCode: 'https://q.me-qr.com/ku9qglhw',
       ),
       StudentModel(
         id: 2,
@@ -163,6 +163,16 @@ class StudentService {
         admittedAt: DateTime(2026, 9, 4, 6, 0),
         photoUrl: 'https://example.com/photo.jpg',
         qrCode: 'STUDENT000015',
+      ),
+      StudentModel(
+        id: 16,
+        instituteId: 1,
+        name: 'kavini Silva',
+        studentCode: 'SIPGAM-ST0005',
+        grade: 'Grade 6',
+        admittedAt: DateTime(2026, 9, 4, 8, 0),
+        photoUrl: 'https://example.com/photo.jpg',
+        qrCode: 'STUDENT000016',
       ),
     ];
 

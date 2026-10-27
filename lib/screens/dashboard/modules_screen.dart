@@ -288,8 +288,14 @@ class ModulesScreen extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => ChangeNotifierProvider(
-                    create: (_) => TuteProvider(),
+                  builder: (_) => MultiProvider(
+                    providers: [
+                      ChangeNotifierProvider(create: (_) => TuteProvider()),
+                      ChangeNotifierProvider(create: (_) => ClassProvider()),
+                      ChangeNotifierProvider(
+                        create: (_) => EnrollmentProvider(),
+                      ),
+                    ],
                     child: const TutesScreen(),
                   ),
                 ),

@@ -161,9 +161,10 @@ class SessionRosterScreen extends StatelessWidget {
         .length;
 
     return Scaffold(
-      backgroundColor: AppColors.authBackground,
+      backgroundColor: AppColors.profileBackground,
       appBar: AppBar(
-        backgroundColor: AppColors.authBackground,
+        backgroundColor: AppColors.profileBackground,
+        foregroundColor: AppColors.authHeading,
         elevation: 0,
         title: Text(
           classItem.name,
