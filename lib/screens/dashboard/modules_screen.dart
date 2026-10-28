@@ -295,6 +295,9 @@ class ModulesScreen extends StatelessWidget {
                       ChangeNotifierProvider(
                         create: (_) => EnrollmentProvider(),
                       ),
+                      ChangeNotifierProvider(
+                        create: (_) => AttendanceProvider(),
+                      ),
                     ],
                     child: const TutesScreen(),
                   ),

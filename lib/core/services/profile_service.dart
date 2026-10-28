@@ -11,6 +11,7 @@ class ProfileService {
     instituteName: 'Sipsala Institute - Gampaha (SIPGAM)',
     googleEmail: 'miraclesoft.lk@gmail.com',
     photoUrl: 'https://example.com/photo.jpg',
+    // photoUrl: 'assets/images/institute_profile.png',
   );
 
   Future<UserProfileModel> getProfile() async {

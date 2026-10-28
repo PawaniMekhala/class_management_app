@@ -9,6 +9,8 @@ import '../../providers/tute_provider.dart';
 import '../../models/class_model.dart';
 import '../../providers/class_provider.dart';
 import '../../providers/enrollment_provider.dart';
+import 'bulk_tute_distribution_screen.dart';
+import '../../providers/attendance_provider.dart';
 
 class TutesScreen extends StatefulWidget {
   const TutesScreen({super.key});
@@ -341,7 +343,45 @@ class _TutesScreenState extends State<TutesScreen> {
                         child: InkWell(
                           borderRadius: BorderRadius.circular(12),
                           onTap: () {
-                            // Bulk Distribution navigation in Step 4.
+                            // Bulk Distribution navigation
+                            if (classItem == null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Associated class not found.'),
+                                ),
+                              );
+                              return;
+                            }
+
+                            // Get the existing provider instances.
+                            final tuteProvider = context.read<TuteProvider>();
+                            final enrollmentProvider = context
+                                .read<EnrollmentProvider>();
+                            final attendanceProvider = context
+                                .read<AttendanceProvider>();
+
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => MultiProvider(
+                                  providers: [
+                                    ChangeNotifierProvider<TuteProvider>.value(
+                                      value: tuteProvider,
+                                    ),
+                                    ChangeNotifierProvider<
+                                      EnrollmentProvider
+                                    >.value(value: enrollmentProvider),
+                                    ChangeNotifierProvider<
+                                      AttendanceProvider
+                                    >.value(value: attendanceProvider),
+                                  ],
+                                  child: BulkTuteDistributionScreen(
+                                    tute: tute,
+                                    instituteClass: classItem,
+                                  ),
+                                ),
+                              ),
+                            );
                           },
                           child: Padding(
                             padding: const EdgeInsets.all(12),
