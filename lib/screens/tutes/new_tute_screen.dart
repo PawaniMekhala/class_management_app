@@ -6,6 +6,8 @@ import '../../providers/tute_provider.dart';
 import '../../models/tute_model.dart';
 import '../../core/theme/app_colors.dart';
 
+import 'package:file_picker/file_picker.dart';
+
 class NewTuteScreen extends StatefulWidget {
   const NewTuteScreen({super.key});
 
@@ -22,16 +24,80 @@ class _NewTuteScreenState extends State<NewTuteScreen> {
   String? _selectedClass;
   bool _isActive = true;
 
+  PlatformFile? _selectedFile;
+  int? _selectedFileSize;
+
+  bool _isSaving = false;
+
   DateTime _releaseDate = DateTime.now();
 
-  // Temporary classes for UI testing.
-  // Later, these will come from ClassProvider.
-  // final List<String> _classes = [
-  //   '2026 A/L Biology',
-  //   '2026 A/L Chemistry',
-  //   '2026 A/L Combined Maths',
-  //   '2026 A/L Physics',
-  // ];
+  // Future<void> _pickAttachment() async {
+  //   try {
+  //     final result = await FilePicker.platform.pickFiles(
+  //       type: FileType.custom,
+  //       allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
+  //       allowMultiple: false,
+  //     );
+
+  //     if (result == null || result.files.isEmpty) {
+  //       return;
+  //     }
+
+  //     final file = result.files.single;
+
+  //     const maxFileSize = 25 * 1024 * 1024;
+
+  //     if (file.size > maxFileSize) {
+  //       if (!mounted) return;
+
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         const SnackBar(content: Text('File size must not exceed 25 MB.')),
+  //       );
+
+  //       return;
+  //     }
+
+  //     setState(() {
+  //       _selectedFile = file;
+  //     });
+  //   } catch (e) {
+  //     if (!mounted) return;
+
+  //     ScaffoldMessenger.of(context)
+  //         .showSnackBar(SnackBar(content: Text('Unable to select file: $e')));
+  //   }
+  // }
+
+  Future<void> _pickAttachment() async {
+    try {
+      final file = await FilePicker.pickFile(
+        type: FileType.custom,
+        allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
+      );
+
+      if (file == null) return;
+
+      final fileSize = await file.length();
+      const maxFileSize = 25 * 1024 * 1024;
+
+      if (fileSize > maxFileSize) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('File size must not exceed 25 MB.')),
+        );
+        return;
+      }
+
+      setState(() {
+        _selectedFile = file;
+        _selectedFileSize = fileSize;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Unable to select file: $e')));
+    }
+  }
 
   @override
   void dispose() {
@@ -57,6 +123,8 @@ class _NewTuteScreenState extends State<NewTuteScreen> {
   }
 
   Future<void> _saveTute() async {
+    if (_isSaving) return;
+
     if (_titleController.text.trim().isEmpty ||
         _selectedClass == null ||
         _unitController.text.trim().isEmpty) {
@@ -66,28 +134,47 @@ class _NewTuteScreenState extends State<NewTuteScreen> {
       return;
     }
 
+    setState(() {
+      _isSaving = true;
+    });
+
     try {
       await context.read<TuteProvider>().createTute(
-        instituteId: 1, // Temporary institute ID
+        instituteId: 1, // TO DO: Use selected institute ID
         classId: int.parse(_selectedClass!),
         name: _titleController.text.trim(),
         unitName: _unitController.text.trim(),
         releaseDate: _releaseDate,
         status: _isActive ? TuteStatus.active : TuteStatus.archived,
+        type: _selectedType == 'Tute' ? TuteType.tute : TuteType.material,
+        description: _descriptionController.text.trim().isEmpty
+            ? null
+            : _descriptionController.text.trim(),
+
+        // Attachment information
+        attachmentName: _selectedFile?.name,
+        attachmentPath: _selectedFile?.path,
+        attachmentSize: _selectedFileSize,
       );
 
       if (!mounted) return;
 
-      Navigator.pop(context);
-
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Tute created successfully!')),
       );
+
+      Navigator.pop(context);
     } catch (e) {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Failed to create tute: $e')));
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSaving = false;
+        });
+      }
     }
   }
 
@@ -137,6 +224,83 @@ class _NewTuteScreenState extends State<NewTuteScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildAttachmentSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Digital Copy (Optional)',
+          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+        ),
+
+        const SizedBox(height: 10),
+
+        InkWell(
+          onTap: _pickAttachment,
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: AppColors.primary.withValues(alpha: 0.3),
+              ),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              children: [
+                Icon(
+                  _selectedFile == null
+                      ? Icons.cloud_upload_outlined
+                      : Icons.insert_drive_file_outlined,
+                  size: 35,
+                  color: AppColors.primary,
+                ),
+
+                const SizedBox(height: 10),
+
+                Text(
+                  _selectedFile == null
+                      ? 'Tap to attach a file'
+                      : _selectedFile!.name,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontWeight: FontWeight.w500),
+                ),
+
+                const SizedBox(height: 5),
+
+                Text(
+                  _selectedFile == null
+                      ? 'PDF, JPG or PNG (Max 25 MB)'
+                      : '${((_selectedFileSize ?? 0) / (1024 * 1024)).toStringAsFixed(2)} MB',
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+              ],
+            ),
+          ),
+        ),
+
+        if (_selectedFile != null) ...[
+          const SizedBox(height: 8),
+
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton.icon(
+              onPressed: () {
+                setState(() {
+                  _selectedFile = null;
+                  _selectedFileSize = null;
+                });
+              },
+              icon: const Icon(Icons.delete_outline),
+              label: const Text('Remove file'),
+            ),
+          ),
+        ],
+      ],
     );
   }
 
@@ -325,47 +489,7 @@ class _NewTuteScreenState extends State<NewTuteScreen> {
             const SizedBox(height: 12),
 
             // Digital Copy
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Row(
-                children: [
-                  Icon(Icons.picture_as_pdf_outlined, color: AppColors.primary),
-
-                  SizedBox(width: 10),
-
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'No digital copy',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        Text(
-                          'Optional PDF or image, up to 25 MB',
-                          style: TextStyle(
-                            fontSize: 10,
-                            color: AppColors.authIcon,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  Text(
-                    'Attach',
-                    style: TextStyle(fontSize: 12, color: AppColors.primary),
-                  ),
-                ],
-              ),
-            ),
+            _buildAttachmentSection(),
 
             const SizedBox(height: 16),
 
@@ -373,7 +497,7 @@ class _NewTuteScreenState extends State<NewTuteScreen> {
             SizedBox(
               height: 46,
               child: ElevatedButton(
-                onPressed: _saveTute,
+                onPressed: _isSaving ? null : _saveTute,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,

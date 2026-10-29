@@ -290,6 +290,10 @@ class ModulesScreen extends StatelessWidget {
                 MaterialPageRoute(
                   builder: (_) => MultiProvider(
                     providers: [
+                      // ChangeNotifierProvider<SelectedInstituteProvider>.value(
+                      //   value: context.read<SelectedInstituteProvider>(),
+                      // ),
+
                       ChangeNotifierProvider(create: (_) => TuteProvider()),
                       ChangeNotifierProvider(create: (_) => ClassProvider()),
                       ChangeNotifierProvider(
@@ -298,6 +302,8 @@ class ModulesScreen extends StatelessWidget {
                       ChangeNotifierProvider(
                         create: (_) => AttendanceProvider(),
                       ),
+                      // Needed by the Distribute tab's student search.
+                      // ChangeNotifierProvider(create: (_) => StudentProvider()),
                     ],
                     child: const TutesScreen(),
                   ),

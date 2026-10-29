@@ -82,6 +82,12 @@ class TuteProvider extends ChangeNotifier {
     required String unitName,
     required DateTime releaseDate,
     required TuteStatus status,
+    required TuteType type,
+    String? description,
+
+    String? attachmentName,
+    String? attachmentPath,
+    int? attachmentSize,
   }) async {
     final newTute = await _service.createTute(
       instituteId: instituteId,
@@ -90,6 +96,12 @@ class TuteProvider extends ChangeNotifier {
       unitName: unitName,
       releaseDate: releaseDate,
       status: status,
+      type: type,
+      description: description,
+
+      attachmentName: attachmentName,
+      attachmentPath: attachmentPath,
+      attachmentSize: attachmentSize,
     );
 
     // Add the new tute to the existing list.

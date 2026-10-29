@@ -104,6 +104,7 @@ class TuteService {
       tuteId: 101,
       studentId: 6,
       receivedAt: DateTime(2026, 10, 1),
+      // issuedBy: 'Dilani Wickramasinghe',
     ),
     TuteDistributionModel(
       id: 2,
@@ -191,6 +192,12 @@ class TuteService {
     required String unitName,
     required DateTime releaseDate,
     required TuteStatus status,
+    required TuteType type,
+    String? description,
+
+    String? attachmentName,
+    String? attachmentPath,
+    int? attachmentSize,
   }) async {
     // TO DO: BACKEND INTEGRATION
     // Replace this dummy implementation with the Create Tute API.
@@ -211,6 +218,12 @@ class TuteService {
       unitName: unitName,
       releaseDate: releaseDate,
       status: status,
+      type: type,
+      description: description,
+
+      attachmentName: attachmentName,
+      attachmentPath: attachmentPath,
+      attachmentSize: attachmentSize,
     );
 
     _tutes.add(newTute);
