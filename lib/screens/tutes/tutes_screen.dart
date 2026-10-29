@@ -11,6 +11,7 @@ import '../../providers/class_provider.dart';
 import '../../providers/enrollment_provider.dart';
 import 'bulk_tute_distribution_screen.dart';
 import '../../providers/attendance_provider.dart';
+import 'new_tute_screen.dart';
 
 class TutesScreen extends StatefulWidget {
   const TutesScreen({super.key});
@@ -118,6 +119,39 @@ class _TutesScreenState extends State<TutesScreen> {
           ),
         ],
       ),
+
+      floatingActionButton: _selectedTab == 0
+          ? FloatingActionButton.extended(
+              onPressed: () {
+                final classProvider = context.read<ClassProvider>();
+                final tuteProvider = context.read<TuteProvider>();
+
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MultiProvider(
+                      providers: [
+                        ChangeNotifierProvider<ClassProvider>.value(
+                          value: classProvider,
+                        ),
+                        ChangeNotifierProvider<TuteProvider>.value(
+                          value: tuteProvider,
+                        ),
+                      ],
+                      child: const NewTuteScreen(),
+                    ),
+                  ),
+                );
+              },
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              icon: const Icon(Icons.add),
+              label: const Text(
+                'New tute',
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+              ),
+            )
+          : null,
     );
   }
 

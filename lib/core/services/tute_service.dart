@@ -182,4 +182,39 @@ class TuteService {
       );
     }
   }
+
+  // Create a new tute using dummy data.
+  Future<TuteModel> createTute({
+    required int instituteId,
+    required int classId,
+    required String name,
+    required String unitName,
+    required DateTime releaseDate,
+    required TuteStatus status,
+  }) async {
+    // TO DO: BACKEND INTEGRATION
+    // Replace this dummy implementation with the Create Tute API.
+    // The backend should return the newly created tute.
+
+    await Future.delayed(const Duration(milliseconds: 300));
+
+    // Generate a unique ID for the new tute.
+    final newId = _tutes.isEmpty
+        ? 1
+        : _tutes.map((tute) => tute.id).reduce((a, b) => a > b ? a : b) + 1;
+
+    final newTute = TuteModel(
+      id: newId,
+      instituteId: instituteId,
+      classId: classId,
+      name: name,
+      unitName: unitName,
+      releaseDate: releaseDate,
+      status: status,
+    );
+
+    _tutes.add(newTute);
+
+    return newTute;
+  }
 }

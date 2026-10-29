@@ -73,4 +73,29 @@ class TuteProvider extends ChangeNotifier {
 
     notifyListeners();
   }
+
+  // Create a new tute.
+  Future<void> createTute({
+    required int instituteId,
+    required int classId,
+    required String name,
+    required String unitName,
+    required DateTime releaseDate,
+    required TuteStatus status,
+  }) async {
+    final newTute = await _service.createTute(
+      instituteId: instituteId,
+      classId: classId,
+      name: name,
+      unitName: unitName,
+      releaseDate: releaseDate,
+      status: status,
+    );
+
+    // Add the new tute to the existing list.
+    _tutes.add(newTute);
+
+    // Refresh the UI.
+    notifyListeners();
+  }
 }
