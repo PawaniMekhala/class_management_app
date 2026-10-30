@@ -6,6 +6,7 @@ import '../../providers/staff_provider.dart';
 import '../../providers/selected_institute_provider.dart';
 import '../../models/staff_model.dart';
 import '../../widgets/cards/staff_card.dart';
+import 'staff_form_screen.dart';
 
 import 'roles_permissions_tab.dart';
 
@@ -51,16 +52,56 @@ class _StaffScreenState extends State<StaffScreen> {
   void _handleStaffAction(String action, StaffModel staff) {
     switch (action) {
       case 'view':
-        _showComingSoon('View staff details');
+        _openStaffForm(staff: staff);
         break;
 
       case 'edit':
-        _showComingSoon('Edit staff');
+        _openStaffForm(staff: staff);
         break;
 
       case 'status':
         _showComingSoon('Manage staff status');
         break;
+    }
+  }
+
+  Future<void> _openStaffForm({StaffModel? staff}) async {
+    final staffProvider = context.read<StaffProvider>();
+
+    final instituteProvider = context.read<SelectedInstituteProvider>();
+
+    final saved = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => MultiProvider(
+          providers: [
+            ChangeNotifierProvider<StaffProvider>.value(value: staffProvider),
+            ChangeNotifierProvider<SelectedInstituteProvider>.value(
+              value: instituteProvider,
+            ),
+          ],
+          child: StaffFormScreen(staff: staff),
+        ),
+      ),
+    );
+
+    if (!mounted) return;
+
+    if (saved == true) {
+      // Clear the search so the updated/new staff is visible.
+      _searchController.clear();
+      staffProvider.clearSearch();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            staff == null
+                ? 'Staff registered successfully.'
+                : 'Staff updated successfully.',
+          ),
+          backgroundColor: Colors.green,
+        ),
+      );
     }
   }
 
@@ -141,7 +182,7 @@ class _StaffScreenState extends State<StaffScreen> {
                   return StaffCard(
                     staff: staff,
                     onTap: () {
-                      _showComingSoon('Staff details');
+                      _openStaffForm(staff: staff);
                     },
                     onActionSelected: (action) {
                       _handleStaffAction(action, staff);
@@ -202,7 +243,7 @@ class _StaffScreenState extends State<StaffScreen> {
               backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
               onPressed: () {
-                _showComingSoon('Register staff');
+                _openStaffForm();
               },
               icon: const Icon(Icons.add),
               label: const Text(

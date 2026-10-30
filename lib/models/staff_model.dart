@@ -7,6 +7,7 @@ class StaffModel {
   final String username;
   final String mobile;
   final String? email;
+  final String? designation;
   final bool isActive;
 
   const StaffModel({
@@ -18,6 +19,29 @@ class StaffModel {
     required this.username,
     required this.mobile,
     this.email,
+    this.designation,
     this.isActive = true,
   });
+
+  StaffModel copyWith({
+    String? name,
+    String? role,
+    String? mobile,
+    String? email,
+    String? designation,
+    bool? isActive,
+  }) {
+    return StaffModel(
+      id: id,
+      instituteId: instituteId,
+      name: name ?? this.name,
+      staffCode: staffCode,
+      role: role ?? this.role,
+      username: username,
+      mobile: mobile ?? this.mobile,
+      email: email ?? this.email,
+      designation: designation ?? this.designation,
+      isActive: isActive ?? this.isActive,
+    );
+  }
 }
