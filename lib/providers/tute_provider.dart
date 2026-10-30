@@ -62,11 +62,15 @@ class TuteProvider extends ChangeNotifier {
     required int instituteId,
     required int tuteId,
     required List<int> studentIds,
+    int? issuedById,
+    String? issuedByName,
   }) async {
     await _service.markAsReceived(
       instituteId: instituteId,
       tuteId: tuteId,
       studentIds: studentIds,
+      issuedById: issuedById,
+      issuedByName: issuedByName,
     );
 
     _distributions = await _service.getDistributions(instituteId);
@@ -109,5 +113,21 @@ class TuteProvider extends ChangeNotifier {
 
     // Refresh the UI.
     notifyListeners();
+  }
+
+  TuteDistributionModel? getDistribution({
+    required int instituteId,
+    required int tuteId,
+    required int studentId,
+  }) {
+    for (final record in _distributions) {
+      if (record.instituteId == instituteId &&
+          record.tuteId == tuteId &&
+          record.studentId == studentId) {
+        return record;
+      }
+    }
+
+    return null;
   }
 }

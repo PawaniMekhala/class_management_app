@@ -4,6 +4,8 @@ class TuteDistributionModel {
   final int tuteId;
   final int studentId;
   final DateTime receivedAt;
+  final int? issuedById;
+  final String? issuedByName;
 
   TuteDistributionModel({
     required this.id,
@@ -11,5 +13,7 @@ class TuteDistributionModel {
     required this.tuteId,
     required this.studentId,
     required this.receivedAt,
+    this.issuedById,
+    this.issuedByName,
   });
 }

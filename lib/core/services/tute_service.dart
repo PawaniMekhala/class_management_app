@@ -104,7 +104,8 @@ class TuteService {
       tuteId: 101,
       studentId: 6,
       receivedAt: DateTime(2026, 10, 1),
-      // issuedBy: 'Dilani Wickramasinghe',
+      issuedById: 3,
+      issuedByName: 'Dilani Wickramasinghe',
     ),
     TuteDistributionModel(
       id: 2,
@@ -112,6 +113,8 @@ class TuteService {
       tuteId: 104,
       studentId: 6,
       receivedAt: DateTime(2026, 10, 8),
+      issuedById: 3,
+      issuedByName: 'Dilani Wickramasinghe',
     ),
     TuteDistributionModel(
       id: 3,
@@ -119,6 +122,8 @@ class TuteService {
       tuteId: 104,
       studentId: 15,
       receivedAt: DateTime(2026, 10, 8),
+      issuedById: 1,
+      issuedByName: 'eshan kumara',
     ),
     TuteDistributionModel(
       id: 4,
@@ -126,6 +131,8 @@ class TuteService {
       tuteId: 105,
       studentId: 6,
       receivedAt: DateTime(2026, 10, 8),
+      issuedById: 4,
+      issuedByName: 'madara ranasinghe',
     ),
   ];
 
@@ -147,6 +154,8 @@ class TuteService {
     required int instituteId,
     required int tuteId,
     required List<int> studentIds,
+    int? issuedById,
+    String? issuedByName,
   }) async {
     final tute = _tutes.where(
       (item) => item.id == tuteId && item.instituteId == instituteId,
@@ -174,11 +183,18 @@ class TuteService {
 
       _distributions.add(
         TuteDistributionModel(
-          id: _distributions.length + 1,
+          id: _distributions.isEmpty
+              ? 1
+              : _distributions
+                        .map((record) => record.id)
+                        .reduce((a, b) => a > b ? a : b) +
+                    1,
           instituteId: instituteId,
           tuteId: tuteId,
           studentId: studentId,
           receivedAt: DateTime.now(),
+          issuedById: issuedById,
+          issuedByName: issuedByName,
         ),
       );
     }

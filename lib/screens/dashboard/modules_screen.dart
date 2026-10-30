@@ -285,25 +285,48 @@ class ModulesScreen extends StatelessWidget {
             description: 'Tutes and learning materials, distribution.',
             icon: Icons.menu_book_outlined,
             onTap: () {
+              // Get the existing selected institute provider.
+              final instituteProvider = context
+                  .read<SelectedInstituteProvider>();
+
+              // Get the existing logged-in user's profile provider.
+              final profileProvider = context.read<ProfileProvider>();
+
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (_) => MultiProvider(
                     providers: [
-                      // ChangeNotifierProvider<SelectedInstituteProvider>.value(
-                      //   value: context.read<SelectedInstituteProvider>(),
-                      // ),
+                      // Reuse the selected institute.
+                      ChangeNotifierProvider<SelectedInstituteProvider>.value(
+                        value: instituteProvider,
+                      ),
 
-                      ChangeNotifierProvider(create: (_) => TuteProvider()),
-                      ChangeNotifierProvider(create: (_) => ClassProvider()),
-                      ChangeNotifierProvider(
+                      // Reuse the currently logged-in user's profile.
+                      ChangeNotifierProvider<ProfileProvider>.value(
+                        value: profileProvider,
+                      ),
+
+                      // Tutes module providers.
+                      ChangeNotifierProvider<TuteProvider>(
+                        create: (_) => TuteProvider(),
+                      ),
+
+                      ChangeNotifierProvider<ClassProvider>(
+                        create: (_) => ClassProvider(),
+                      ),
+
+                      ChangeNotifierProvider<EnrollmentProvider>(
                         create: (_) => EnrollmentProvider(),
                       ),
-                      ChangeNotifierProvider(
+
+                      ChangeNotifierProvider<AttendanceProvider>(
                         create: (_) => AttendanceProvider(),
                       ),
-                      // Needed by the Distribute tab's student search.
-                      // ChangeNotifierProvider(create: (_) => StudentProvider()),
+
+                      ChangeNotifierProvider<StudentProvider>(
+                        create: (_) => StudentProvider(),
+                      ),
                     ],
                     child: const TutesScreen(),
                   ),
@@ -332,6 +355,7 @@ class ModulesScreen extends StatelessWidget {
                       ChangeNotifierProvider<HallProvider>(
                         create: (_) => HallProvider(),
                       ),
+                      ChangeNotifierProvider(create: (_) => ProfileProvider()),
                     ],
                     child: const HallsScreen(),
                   ),

@@ -1,350 +1,332 @@
-// import 'package:flutter/material.dart';
-// import 'package:provider/provider.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-// import '../../core/theme/app_colors.dart';
-// import '../../core/utils/app_snackbar.dart';
-// import '../../core/utils/formatters.dart';
-// import '../../models/enrollment_model.dart';
-// import '../../models/student_model.dart';
-// import '../../models/tute_model.dart';
-// import '../../providers/enrollment_provider.dart';
-// import '../../providers/student_provider.dart';
-// import '../../providers/tute_provider.dart';
-// import '../../widgets/cards/student_list_tile.dart';
-// import '../../widgets/cards/tute_issue_tile.dart';
-// import '../../widgets/common/empty_state.dart';
-// import '../../widgets/common/student_search_field.dart';
-// import '../../widgets/dialogs/confirmation_dialog.dart';
+import '../../core/theme/app_colors.dart';
+import '../../models/student_model.dart';
+import '../../models/enrollment_model.dart';
+import '../../models/tute_model.dart';
+import '../../providers/student_provider.dart';
+import '../../providers/enrollment_provider.dart';
+import '../../providers/tute_provider.dart';
+import '../../widgets/common/student_search_field.dart';
+import '../../providers/profile_provider.dart';
+import 'widgets/distribution_student_card.dart';
+import 'widgets/distribution_tute_tile.dart';
 
-// /// "Distribute" tab of Tutes & Materials.
-// ///
-// /// Flow:
-// ///  1. Admin scans a QR / types a student number, code, phone or name.
-// ///  2. The student's enrolled classes are listed with every tute of each class.
-// ///  3. Issued tutes show who issued them and when.
-// ///     Tutes not yet received show "available - tap to issue".
-// ///  4. Tap an available tute -> confirm -> it becomes issued and the
-// ///     Tutes tab counts update (same TuteProvider).
-// ///
-// /// Needs these providers above it: StudentProvider, EnrollmentProvider,
-// /// TuteProvider (all added in the Tutes module route).
-// class DistributeTab extends StatefulWidget {
-//   final int instituteId;
+class DistributeTab extends StatefulWidget {
+  const DistributeTab({super.key});
 
-//   const DistributeTab({super.key, required this.instituteId});
+  @override
+  State<DistributeTab> createState() => _DistributeTabState();
+}
 
-//   @override
-//   State<DistributeTab> createState() => _DistributeTabState();
-// }
+class _DistributeTabState extends State<DistributeTab> {
+  StudentModel? _selectedStudent;
+  List<StudentModel> _results = [];
 
-// class _DistributeTabState extends State<DistributeTab> {
-//   StudentModel? _selected;
-//   List<StudentModel> _candidates = [];
-//   String _query = '';
+  int? _issuingTuteId;
 
-//   @override
-//   void didUpdateWidget(covariant DistributeTab oldWidget) {
-//     super.didUpdateWidget(oldWidget);
+  // Confirm before issuing a tute.
+  Future<void> _confirmIssue(TuteModel tute, StudentModel student) async {
+    if (_issuingTuteId != null) return;
 
-//     // Institute switched: the old student no longer applies.
-//     if (oldWidget.instituteId != widget.instituteId) {
-//       _selected = null;
-//       _candidates = [];
-//       _query = '';
-//     }
-//   }
+    if (tute.status != TuteStatus.active ||
+        tute.releaseDate.isAfter(DateTime.now())) {
+      return;
+    }
 
-//   // One match -> select it (typical for a QR scan).
-//   // Several matches -> let the admin pick.
-//   // None -> clear.
-//   void _onResults(List<StudentModel> results) {
-//     setState(() {
-//       _candidates = results.length > 1 ? results : [];
-//       _selected = results.length == 1 ? results.first : null;
-//     });
-//   }
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Issue tute?'),
+        content: Text('Issue "${tute.name}" to ${student.name}?'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(dialogContext, false);
+            },
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () {
+              Navigator.pop(dialogContext, true);
+            },
+            child: const Text('Confirm Issue'),
+          ),
+        ],
+      ),
+    );
 
-//   Future<void> _issue(
-//     StudentModel student,
-//     TuteModel tute,
-//     EnrollmentModel enrollment,
-//   ) async {
-//     final confirmed = await ConfirmationDialog.show(
-//       context,
-//       title: 'Issue tute?',
-//       message:
-//           'Issue "${tute.name}" to ${student.name} '
-//           '(${enrollment.classCode})?',
-//       confirmText: 'Issue',
-//     );
+    if (confirmed != true || !mounted) return;
 
-//     if (!confirmed || !mounted) return;
+    setState(() {
+      _issuingTuteId = tute.id;
+    });
 
-//     try {
-//       // TO DO BACKEND: TuteProvider -> TuteService.markAsReceived()
-//       // sends POST /api/institutes/{id}/tutes/{tuteId}/distributions
-//       await context.read<TuteProvider>().issueToStudent(
-//         instituteId: widget.instituteId,
-//         tuteId: tute.id,
-//         studentId: student.id,
-//       );
+    try {
+      // Get the currently logged-in user's profile.
+      final profile = context.read<ProfileProvider>().profile;
 
-//       if (!mounted) return;
-//       AppSnackBar.show(context, '${tute.name} issued to ${student.name}.');
-//     } catch (error) {
-//       if (!mounted) return;
-//       AppSnackBar.error(context, error, fallback: 'Unable to issue tute.');
-//     }
-//   }
+      debugPrint('Current user: ${profile?.name}');
+      debugPrint('Current user ID: ${profile?.id}');
 
-//   void _reissue() {
-//     // TO DO: open the Reissue flow (Reissue tab) for this tute + student.
-//     // TO DO BACKEND: POST /api/institutes/{id}/tute-distributions/{id}/reissue
-//     AppSnackBar.show(context, 'Reissue will be added with the Reissue tab.');
-//   }
+      if (profile == null) {
+        throw Exception(
+          'User profile is not available. Please reload your profile.',
+        );
+      }
 
-//   // ------------------------------------------------------------------
-//   // UI pieces
-//   // ------------------------------------------------------------------
+      // TO DO: BACKEND INTEGRATION
+      // The backend should identify the issuing staff member
+      // using the authenticated user's access token.
+      await context.read<TuteProvider>().markAsReceived(
+        instituteId: student.instituteId,
+        tuteId: tute.id,
+        studentIds: [student.id],
+        issuedById: profile.id,
+        issuedByName: profile.name,
+      );
 
-//   Widget _studentCard(StudentModel student) {
-//     final initial = student.name.trim().isEmpty
-//         ? '?'
-//         : student.name.trim()[0].toUpperCase();
+      if (!mounted) return;
 
-//     return Container(
-//       width: double.infinity,
-//       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-//       decoration: BoxDecoration(
-//         color: AppColors.surface,
-//         borderRadius: BorderRadius.circular(12),
-//       ),
-//       child: Row(
-//         children: [
-//           CircleAvatar(
-//             radius: 17,
-//             backgroundColor: AppColors.moduleIconBackground,
-//             child: Text(
-//               initial,
-//               style: const TextStyle(
-//                 fontSize: 13,
-//                 fontWeight: FontWeight.w600,
-//                 color: AppColors.authHeading,
-//               ),
-//             ),
-//           ),
-//           const SizedBox(width: 12),
-//           Expanded(
-//             child: Column(
-//               crossAxisAlignment: CrossAxisAlignment.start,
-//               children: [
-//                 Text(
-//                   student.name,
-//                   style: const TextStyle(
-//                     fontSize: 13,
-//                     fontWeight: FontWeight.w600,
-//                     color: AppColors.authHeading,
-//                   ),
-//                 ),
-//                 const SizedBox(height: 2),
-//                 Text(
-//                   '${student.studentCode} · ${student.grade}',
-//                   style: const TextStyle(
-//                     fontSize: 10,
-//                     color: AppColors.authIcon,
-//                   ),
-//                 ),
-//               ],
-//             ),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Tute issued successfully.')),
+      );
+    } catch (error) {
+      if (!mounted) return;
 
-//   Widget _classSection({
-//     required StudentModel student,
-//     required EnrollmentModel enrollment,
-//     required TuteProvider tuteProvider,
-//   }) {
-//     final tutes =
-//         tuteProvider.tutes.where((tute) {
-//           if (tute.instituteId != widget.instituteId) return false;
-//           if (tute.classId != enrollment.classId) return false;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Could not issue tute: $error')));
+    } finally {
+      if (mounted) {
+        setState(() {
+          _issuingTuteId = null;
+        });
+      }
+    }
+  }
 
-//           // Archived tutes cannot be issued, so only show them
-//           // when the student already received them.
-//           final issued = tuteProvider.hasReceived(
-//             tuteId: tute.id,
-//             studentId: student.id,
-//           );
-//           return issued || tute.status == TuteStatus.active;
-//         }).toList()..sort((a, b) => a.releaseDate.compareTo(b.releaseDate));
+  @override
+  Widget build(BuildContext context) {
+    return Consumer3<StudentProvider, EnrollmentProvider, TuteProvider>(
+      builder:
+          (
+            context,
+            studentsProvider,
+            enrollmentsProvider,
+            tutesProvider,
+            child,
+          ) {
+            if (studentsProvider.isLoading ||
+                enrollmentsProvider.isLoading ||
+                tutesProvider.isLoading) {
+              return const Center(
+                child: CircularProgressIndicator(color: AppColors.primary),
+              );
+            }
 
-//     return Column(
-//       crossAxisAlignment: CrossAxisAlignment.start,
-//       children: [
-//         Padding(
-//           padding: const EdgeInsets.only(top: 18, bottom: 4),
-//           child: Text(
-//             '${enrollment.className} (${enrollment.classCode})',
-//             style: const TextStyle(
-//               fontSize: 12,
-//               fontWeight: FontWeight.w500,
-//               color: AppColors.primary,
-//             ),
-//           ),
-//         ),
-//         if (tutes.isEmpty)
-//           const Padding(
-//             padding: EdgeInsets.symmetric(vertical: 8),
-//             child: Text(
-//               'No tutes for this class yet.',
-//               style: TextStyle(fontSize: 11, color: AppColors.authIcon),
-//             ),
-//           ),
-//         for (final tute in tutes) _tuteTile(student, tute, enrollment, tuteProvider),
-//       ],
-//     );
-//   }
+            if (studentsProvider.errorMessage != null ||
+                enrollmentsProvider.errorMessage != null ||
+                tutesProvider.errorMessage != null) {
+              return Center(
+                child: Text(
+                  studentsProvider.errorMessage ??
+                      enrollmentsProvider.errorMessage ??
+                      tutesProvider.errorMessage!,
+                ),
+              );
+            }
 
-//   Widget _tuteTile(
-//     StudentModel student,
-//     TuteModel tute,
-//     EnrollmentModel enrollment,
-//     TuteProvider tuteProvider,
-//   ) {
-//     final record = tuteProvider.distributionFor(
-//       tuteId: tute.id,
-//       studentId: student.id,
-//     );
+            final students = studentsProvider.students;
+            final student = _selectedStudent;
 
-//     final subtitle = record == null
-//         ? 'available – tap to issue'
-//         : 'Issued ${AppFormatters.longDate(record.receivedAt)} '
-//               'by ${record.issuedBy}'
-//               '${record.reissueCount > 0 ? ' · reissued ${record.reissueCount}×' : ''}';
+            final selectedExists =
+                student != null &&
+                students.any(
+                  (s) =>
+                      s.id == student.id &&
+                      s.instituteId == student.instituteId,
+                );
 
-//     return TuteIssueTile(
-//       title: tute.name,
-//       subtitle: subtitle,
-//       isIssued: record != null,
-//       isBusy: tuteProvider.isIssuing(tuteId: tute.id, studentId: student.id),
-//       onIssue: () => _issue(student, tute, enrollment),
-//       onReissue: _reissue,
-//     );
-//   }
+            return ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                const Text(
+                  'Scan QR or enter student no. / code',
+                  style: TextStyle(fontSize: 11, color: AppColors.authIcon),
+                ),
 
-//   Widget _body(
-//     StudentProvider studentProvider,
-//     TuteProvider tuteProvider,
-//     EnrollmentProvider enrollmentProvider,
-//   ) {
-//     final student = _selected;
+                const SizedBox(height: 6),
 
-//     if (student != null) {
-//       // Classes the student is currently enrolled in.
-//       final enrollments =
-//           enrollmentProvider.enrollments
-//               .where(
-//                 (e) =>
-//                     e.instituteId == widget.instituteId &&
-//                     e.studentId == student.id &&
-//                     e.status == 'enrolled',
-//               )
-//               .toList()
-//             ..sort((a, b) => a.classId.compareTo(b.classId));
+                // Reuse the existing student search widget.
+                StudentSearchField(
+                  students: students,
+                  onResultsChanged: (results) {
+                    setState(() {
+                      _results = results;
+                      _selectedStudent = null;
+                    });
+                  },
+                ),
 
-//       return ListView(
-//         padding: const EdgeInsets.fromLTRB(16, 4, 16, 30),
-//         children: [
-//           _studentCard(student),
-//           if (enrollments.isEmpty)
-//             const Padding(
-//               padding: EdgeInsets.only(top: 40),
-//               child: EmptyState(
-//                 icon: Icons.groups_outlined,
-//                 title: 'Not enrolled in any class',
-//                 subtitle: 'Enroll the student in a class to issue tutes.',
-//               ),
-//             ),
-//           for (final enrollment in enrollments)
-//             _classSection(
-//               student: student,
-//               enrollment: enrollment,
-//               tuteProvider: tuteProvider,
-//             ),
-//         ],
-//       );
-//     }
+                // Search results.
+                if (_results.isNotEmpty && _selectedStudent == null) ...[
+                  const SizedBox(height: 8),
 
-//     if (_candidates.isNotEmpty) {
-//       return ListView.separated(
-//         padding: const EdgeInsets.only(bottom: 30),
-//         itemCount: _candidates.length,
-//         separatorBuilder: (_, _) =>
-//             const Divider(height: 1, color: AppColors.profileDivider),
-//         itemBuilder: (_, index) {
-//           final candidate = _candidates[index];
-//           return StudentListTile(
-//             student: candidate,
-//             onTap: () => setState(() {
-//               _selected = candidate;
-//               _candidates = [];
-//             }),
-//           );
-//         },
-//       );
-//     }
+                  ..._results
+                      .take(8)
+                      .map(
+                        (result) => ListTile(
+                          tileColor: AppColors.surface,
+                          leading: const Icon(
+                            Icons.person_outline,
+                            color: AppColors.primary,
+                          ),
+                          title: Text(result.name),
+                          subtitle: Text(result.studentCode),
+                          onTap: () {
+                            setState(() {
+                              _selectedStudent = result;
+                              _results = [];
+                            });
+                          },
+                        ),
+                      ),
+                ],
 
-//     if (_query.isNotEmpty) {
-//       return const EmptyState(
-//         icon: Icons.search_off,
-//         title: 'No student found',
-//         subtitle: 'Check the student number or scan the QR again.',
-//       );
-//     }
+                if (!selectedExists) ...[
+                  const SizedBox(height: 28),
 
-//     return const EmptyState(
-//       icon: Icons.qr_code_scanner,
-//       title: 'Find the student',
-//       subtitle: 'Scan the QR or enter the student no. / code to see their tutes.',
-//     );
-//   }
+                  const Center(
+                    child: Text(
+                      'Search and select a student to view tutes.',
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ] else ...[
+                  const SizedBox(height: 12),
 
-//   @override
-//   Widget build(BuildContext context) {
-//     return Consumer3<StudentProvider, TuteProvider, EnrollmentProvider>(
-//       builder: (context, studentProvider, tuteProvider, enrollmentProvider, _) {
-//         if (studentProvider.isLoading ||
-//             tuteProvider.isLoading ||
-//             enrollmentProvider.isLoading) {
-//           return const Center(child: CircularProgressIndicator());
-//         }
+                  // Selected student information.
+                  DistributionStudentCard(student: student),
 
-//         final error =
-//             studentProvider.errorMessage ??
-//             tuteProvider.errorMessage ??
-//             enrollmentProvider.errorMessage;
+                  const SizedBox(height: 16),
 
-//         if (error != null) {
-//           return EmptyState(icon: Icons.error_outline, title: error);
-//         }
+                  // Student's class-wise tute list.
+                  ..._classSections(
+                    student,
+                    enrollmentsProvider.enrollments,
+                    tutesProvider,
+                  ),
+                ],
+              ],
+            );
+          },
+    );
+  }
 
-//         return Column(
-//           children: [
-//             Padding(
-//               padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
-//               child: StudentSearchField(
-//                 students: studentProvider.students,
-//                 onResultsChanged: _onResults,
-//                 onQueryChanged: (query) => setState(() => _query = query),
-//               ),
-//             ),
-//             Expanded(child: _body(studentProvider, tuteProvider, enrollmentProvider)),
-//           ],
-//         );
-//       },
-//     );
-//   }
-// }
+  List<Widget> _classSections(
+    StudentModel student,
+    List<EnrollmentModel> enrollments,
+    TuteProvider provider,
+  ) {
+    // Find classes in which this student is enrolled.
+    final studentEnrollments = enrollments
+        .where(
+          (e) =>
+              e.instituteId == student.instituteId &&
+              e.studentId == student.id &&
+              e.status == 'enrolled',
+        )
+        .toList();
+
+    // Avoid displaying the same class multiple times.
+    final uniqueClasses = <int, EnrollmentModel>{};
+
+    for (final enrollment in studentEnrollments) {
+      uniqueClasses[enrollment.classId] = enrollment;
+    }
+
+    if (uniqueClasses.isEmpty) {
+      return [
+        const Text('No active class enrollments found for this student.'),
+      ];
+    }
+
+    final sections = <Widget>[];
+
+    for (final enrollment in uniqueClasses.values) {
+      // Find tutes belonging to this class.
+      final classTutes =
+          provider.tutes
+              .where(
+                (tute) =>
+                    tute.instituteId == student.instituteId &&
+                    tute.classId == enrollment.classId,
+              )
+              .toList()
+            ..sort((a, b) => a.releaseDate.compareTo(b.releaseDate));
+
+      // Class heading.
+      sections.add(
+        Padding(
+          padding: const EdgeInsets.only(top: 10, bottom: 8),
+          child: Text(
+            '${enrollment.className} (${enrollment.classCode})',
+            style: const TextStyle(
+              color: AppColors.primary,
+              fontWeight: FontWeight.w600,
+              fontSize: 12,
+            ),
+          ),
+        ),
+      );
+
+      if (classTutes.isEmpty) {
+        sections.add(
+          const Padding(
+            padding: EdgeInsets.only(bottom: 10),
+            child: Text('No tutes for this class.'),
+          ),
+        );
+      }
+
+      for (final tute in classTutes) {
+        // Check whether the selected student received this tute.
+        final distribution = provider.getDistribution(
+          instituteId: student.instituteId,
+          tuteId: tute.id,
+          studentId: student.id,
+        );
+
+        final available =
+            distribution == null &&
+            tute.status == TuteStatus.active &&
+            !tute.releaseDate.isAfter(DateTime.now());
+
+        sections.add(
+          DistributionTuteTile(
+            tute: tute,
+            receivedAt: distribution?.receivedAt,
+            issuedByName: distribution?.issuedByName,
+            isIssuing: _issuingTuteId == tute.id,
+            onTap: available ? () => _confirmIssue(tute, student) : null,
+
+            // TO DO: Connect to Reissue Tute form.
+            onReissue: distribution != null
+                ? () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Reissue form will be implemented next.'),
+                      ),
+                    );
+                  }
+                : null,
+          ),
+        );
+      }
+    }
+
+    return sections;
+  }
+}

@@ -11,7 +11,9 @@ import '../../providers/class_provider.dart';
 import '../../providers/enrollment_provider.dart';
 import 'bulk_tute_distribution_screen.dart';
 import '../../providers/attendance_provider.dart';
+import '../../providers/student_provider.dart';
 import 'new_tute_screen.dart';
+import 'distribute_tab.dart';
 
 class TutesScreen extends StatefulWidget {
   const TutesScreen({super.key});
@@ -46,6 +48,7 @@ class _TutesScreenState extends State<TutesScreen> {
       context.read<TuteProvider>().loadTutes(instituteId);
       context.read<ClassProvider>().loadClasses(instituteId);
       context.read<EnrollmentProvider>().load(instituteId);
+      context.read<StudentProvider>().loadStudents(instituteId);
     });
   }
 
@@ -115,6 +118,8 @@ class _TutesScreenState extends State<TutesScreen> {
           Expanded(
             child: _selectedTab == 0
                 ? _buildTutesTab()
+                : _selectedTab == 1
+                ? const DistributeTab()
                 : _buildPlaceholderTab(),
           ),
         ],
