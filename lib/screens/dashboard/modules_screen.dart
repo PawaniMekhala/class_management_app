@@ -429,6 +429,14 @@ class ModulesScreen extends StatelessWidget {
               );
             },
           ),
+
+          // Roles And Permissions module card
+          ModuleCard(
+            title: 'Roles & Permissions',
+            description: 'Staff Roles And Permissions.',
+            icon: Icons.badge_outlined,
+            onTap: () {},
+          ),
         ],
       ),
 

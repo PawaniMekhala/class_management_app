@@ -7,6 +7,8 @@ import '../../providers/selected_institute_provider.dart';
 import '../../models/staff_model.dart';
 import '../../widgets/cards/staff_card.dart';
 
+import 'roles_permissions_tab.dart';
+
 class StaffScreen extends StatefulWidget {
   const StaffScreen({super.key});
 
@@ -16,6 +18,8 @@ class StaffScreen extends StatefulWidget {
 
 class _StaffScreenState extends State<StaffScreen> {
   final TextEditingController _searchController = TextEditingController();
+
+  int _selectedTab = 0;
 
   @override
   void initState() {
@@ -60,6 +64,98 @@ class _StaffScreenState extends State<StaffScreen> {
     }
   }
 
+  Widget _buildStaffTab() {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+          child: TextField(
+            controller: _searchController,
+            onChanged: (value) {
+              context.read<StaffProvider>().searchStaff(value);
+              setState(() {});
+            },
+            decoration: InputDecoration(
+              hintText: 'Search name, username, mobile',
+              hintStyle: const TextStyle(
+                fontSize: 12,
+                color: AppColors.authIcon,
+              ),
+              prefixIcon: const Icon(
+                Icons.search,
+                size: 20,
+                color: AppColors.authIcon,
+              ),
+              suffixIcon: _searchController.text.isNotEmpty
+                  ? IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: () {
+                        _searchController.clear();
+                        context.read<StaffProvider>().clearSearch();
+                        setState(() {});
+                      },
+                    )
+                  : null,
+              filled: true,
+              fillColor: AppColors.surface,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+              contentPadding: const EdgeInsets.symmetric(vertical: 12),
+            ),
+          ),
+        ),
+
+        Expanded(
+          child: Consumer<StaffProvider>(
+            builder: (context, provider, child) {
+              if (provider.isLoading) {
+                return const Center(
+                  child: CircularProgressIndicator(color: AppColors.primary),
+                );
+              }
+
+              if (provider.errorMessage != null) {
+                return Center(child: Text(provider.errorMessage!));
+              }
+
+              final staffList = provider.staff;
+
+              if (staffList.isEmpty) {
+                return const Center(
+                  child: Text(
+                    'No staff members found.',
+                    style: TextStyle(color: AppColors.authIcon),
+                  ),
+                );
+              }
+
+              return ListView.separated(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                itemCount: staffList.length,
+                separatorBuilder: (_, _) => const Divider(height: 1),
+                itemBuilder: (context, index) {
+                  final staff = staffList[index];
+
+                  return StaffCard(
+                    staff: staff,
+                    onTap: () {
+                      _showComingSoon('Staff details');
+                    },
+                    onActionSelected: (action) {
+                      _handleStaffAction(action, staff);
+                    },
+                  );
+                },
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -81,106 +177,72 @@ class _StaffScreenState extends State<StaffScreen> {
 
       body: Column(
         children: [
-          // Search field
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-            child: TextField(
-              controller: _searchController,
-              onChanged: (value) {
-                context.read<StaffProvider>().searchStaff(value);
-              },
-              decoration: InputDecoration(
-                hintText: 'Search name, username, mobile',
-                hintStyle: const TextStyle(
-                  fontSize: 12,
-                  color: AppColors.authIcon,
-                ),
-                prefixIcon: const Icon(
-                  Icons.search,
-                  size: 20,
-                  color: AppColors.authIcon,
-                ),
-                suffixIcon: _searchController.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          _searchController.clear();
-                          context.read<StaffProvider>().clearSearch();
-                          setState(() {});
-                        },
-                      )
-                    : null,
-                filled: true,
-                fillColor: AppColors.surface,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-                contentPadding: const EdgeInsets.symmetric(vertical: 12),
-              ),
+          // Staff and Roles & Permissions tabs.
+          Container(
+            color: AppColors.authBackground,
+            child: Row(
+              children: [
+                _buildTab('Staff', 0),
+                _buildTab('Roles & Permissions', 1),
+              ],
             ),
           ),
 
-          // Staff list
           Expanded(
-            child: Consumer<StaffProvider>(
-              builder: (context, provider, child) {
-                if (provider.isLoading) {
-                  return const Center(
-                    child: CircularProgressIndicator(color: AppColors.primary),
-                  );
-                }
-
-                if (provider.errorMessage != null) {
-                  return Center(child: Text(provider.errorMessage!));
-                }
-
-                final staffList = provider.staff;
-
-                if (staffList.isEmpty) {
-                  return const Center(
-                    child: Text(
-                      'No staff members found.',
-                      style: TextStyle(color: AppColors.authIcon),
-                    ),
-                  );
-                }
-
-                return ListView.separated(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemCount: staffList.length,
-                  separatorBuilder: (_, _) => const Divider(height: 1),
-                  itemBuilder: (context, index) {
-                    final staff = staffList[index];
-
-                    return StaffCard(
-                      staff: staff,
-                      onTap: () {
-                        _showComingSoon('Staff details');
-                      },
-                      onActionSelected: (action) {
-                        _handleStaffAction(action, staff);
-                      },
-                    );
-                  },
-                );
-              },
-            ),
+            child: _selectedTab == 0
+                ? _buildStaffTab()
+                : const RolesPermissionsTab(),
           ),
         ],
       ),
 
-      // Register staff button
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-        onPressed: () {
-          _showComingSoon('Register staff');
+      // Register button only appears on Staff tab.
+      floatingActionButton: _selectedTab == 0
+          ? FloatingActionButton.extended(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              onPressed: () {
+                _showComingSoon('Register staff');
+              },
+              icon: const Icon(Icons.add),
+              label: const Text(
+                'Register staff',
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+              ),
+            )
+          : null,
+    );
+  }
+
+  Widget _buildTab(String title, int index) {
+    final isSelected = _selectedTab == index;
+
+    return Expanded(
+      child: InkWell(
+        onTap: () {
+          setState(() {
+            _selectedTab = index;
+          });
         },
-        icon: const Icon(Icons.add),
-        label: const Text(
-          'Register staff',
-          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: BorderSide(
+                color: isSelected ? AppColors.primary : Colors.transparent,
+                width: 2,
+              ),
+            ),
+          ),
+          child: Text(
+            title,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+              color: isSelected ? AppColors.primary : AppColors.authIcon,
+            ),
+          ),
         ),
       ),
     );
