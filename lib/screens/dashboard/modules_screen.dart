@@ -30,6 +30,8 @@ import '../attendance/attendance_screen.dart';
 import '../../providers/attendance_provider.dart';
 import '../tutes/tutes_screen.dart';
 import '../../providers/tute_provider.dart';
+import '../../providers/staff_provider.dart';
+import '../staff/staff_screen.dart';
 
 class ModulesScreen extends StatelessWidget {
   const ModulesScreen({super.key});
@@ -343,7 +345,6 @@ class ModulesScreen extends StatelessWidget {
             onTap: () {
               final instituteProvider = context
                   .read<SelectedInstituteProvider>();
-
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -404,7 +405,28 @@ class ModulesScreen extends StatelessWidget {
             description: 'Staff accounts and their roles.',
             icon: Icons.badge_outlined,
             onTap: () {
-              // TO DO: Open Staff screen.
+              final instituteProvider = context
+                  .read<SelectedInstituteProvider>();
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => MultiProvider(
+                    providers: [
+                      // Reuse selected institute.
+                      ChangeNotifierProvider<SelectedInstituteProvider>.value(
+                        value: instituteProvider,
+                      ),
+
+                      // Staff data provider.
+                      ChangeNotifierProvider<StaffProvider>(
+                        create: (_) => StaffProvider(),
+                      ),
+                    ],
+                    child: const StaffScreen(),
+                  ),
+                ),
+              );
             },
           ),
         ],
