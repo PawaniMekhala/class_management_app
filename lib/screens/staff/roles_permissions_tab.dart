@@ -1,172 +1,208 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../../models/staff_role_model.dart';
+import '../../providers/selected_institute_provider.dart';
+import '../../providers/staff_provider.dart';
+import '../../providers/staff_role_provider.dart';
+import '../../widgets/cards/staff_role_card.dart';
+import '../../widgets/buttons/register_fab.dart';
 
-class RolesPermissionsTab extends StatelessWidget {
+import 'new_role_screen.dart';
+
+class RolesPermissionsTab extends StatefulWidget {
   const RolesPermissionsTab({super.key});
 
   @override
+  State<RolesPermissionsTab> createState() => _RolesPermissionsTabState();
+}
+
+class _RolesPermissionsTabState extends State<RolesPermissionsTab> {
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
+      final instituteId = context
+          .read<SelectedInstituteProvider>()
+          .selectedInstituteId;
+
+      context.read<StaffRoleProvider>().loadRoles(instituteId);
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  int _getStaffCount(StaffRoleModel role) {
+    final staffProvider = context.read<StaffProvider>();
+
+    // Count all staff, not just the currently searched results.
+    return staffProvider.allStaff.where((member) {
+      return member.instituteId == role.instituteId &&
+          member.role.trim().toLowerCase() == role.name.trim().toLowerCase();
+    }).length;
+  }
+
+  Future<void> _openNewRoleScreen() async {
+    final roleProvider = context.read<StaffRoleProvider>();
+
+    final instituteProvider = context.read<SelectedInstituteProvider>();
+
+    final saved = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => MultiProvider(
+          providers: [
+            ChangeNotifierProvider<StaffRoleProvider>.value(
+              value: roleProvider,
+            ),
+            ChangeNotifierProvider<SelectedInstituteProvider>.value(
+              value: instituteProvider,
+            ),
+          ],
+          child: const NewRoleScreen(),
+        ),
+      ),
+    );
+
+    if (!mounted) return;
+
+    if (saved == true) {
+      _searchController.clear();
+      roleProvider.clearSearch();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Role created successfully.'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    }
+  }
+
+  void _openRoleDetails(StaffRoleModel role) {
+    // TO DO: Implement the Role Details & Permissions screen.
+    // This screen will display the selected role's module
+    // permissions and allow authorized changes.
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          '${role.name} permissions screen will be implemented next.',
+        ),
+      ),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // TODO: BACKEND INTEGRATION
-    // Replace dummy roles and permissions with API data.
-
-    final roles = [
-      {
-        'name': 'Institute Owner',
-        'description': 'Full access to institute management.',
-        'permissions': [
-          'Manage institutes',
-          'Manage staff',
-          'Manage students',
-          'Manage classes',
-          'Manage payments',
-          'Manage attendance',
-          'Manage tutes',
-          'Manage roles and permissions',
-        ],
-      },
-      {
-        'name': 'Institute Admin',
-        'description': 'Manage daily institute operations.',
-        'permissions': [
-          'Manage staff',
-          'Manage students',
-          'Manage teachers',
-          'Manage classes',
-          'Manage attendance',
-          'Manage payments',
-          'Manage tutes',
-        ],
-      },
-      {
-        'name': 'Cashier',
-        'description': 'Manage student payments and receipts.',
-        'permissions': [
-          'View students',
-          'Collect payments',
-          'View payment history',
-          'Issue receipts',
-        ],
-      },
-      {
-        'name': 'Gate Officer',
-        'description': 'Manage student entry and exit.',
-        'permissions': [
-          'Scan student QR codes',
-          'Mark student entry',
-          'Mark student exit',
-          'View attendance',
-        ],
-      },
-      {
-        'name': 'Learning Material Distributor',
-        'description': 'Manage learning material distribution.',
-        'permissions': [
-          'View students',
-          'View tutes',
-          'Distribute tutes',
-          'View distribution history',
-        ],
-      },
-      {
-        'name': 'Front Desk',
-        'description': 'Assist with institute front desk operations.',
-        'permissions': [
-          'View students',
-          'Check payment status',
-          'View class details',
-        ],
-      },
-    ];
-
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: roles.length,
-      itemBuilder: (context, index) {
-        final role = roles[index];
-
-        final permissions = role['permissions'] as List<String>;
-
-        return Card(
-          color: AppColors.surface,
-          elevation: 0,
-          margin: const EdgeInsets.only(bottom: 12),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: ExpansionTile(
-            leading: CircleAvatar(
-              backgroundColor: AppColors.primary.withValues(alpha: 0.10),
-              child: const Icon(
-                Icons.admin_panel_settings_outlined,
-                color: AppColors.primary,
+    return Column(
+      children: [
+        // Search roles.
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+          child: TextField(
+            controller: _searchController,
+            onChanged: (value) {
+              context.read<StaffRoleProvider>().searchRoles(value);
+              setState(() {});
+            },
+            decoration: InputDecoration(
+              hintText: 'Search roles',
+              hintStyle: const TextStyle(
+                fontSize: 12,
+                color: AppColors.authIcon,
+              ),
+              prefixIcon: const Icon(
+                Icons.search,
+                color: AppColors.authIcon,
                 size: 20,
               ),
-            ),
-            title: Text(
-              role['name'] as String,
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: AppColors.authHeading,
+              suffixIcon: _searchController.text.isNotEmpty
+                  ? IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: () {
+                        _searchController.clear();
+                        context.read<StaffRoleProvider>().clearSearch();
+                        setState(() {});
+                      },
+                    )
+                  : null,
+              filled: true,
+              fillColor: AppColors.surface,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide.none,
               ),
+              contentPadding: const EdgeInsets.symmetric(vertical: 12),
             ),
-            subtitle: Text(
-              role['description'] as String,
-              style: const TextStyle(fontSize: 11, color: AppColors.authIcon),
-            ),
-            children: [
-              const Divider(height: 1),
-
-              Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Permissions',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.authHeading,
-                      ),
-                    ),
-
-                    const SizedBox(height: 8),
-
-                    ...permissions.map(
-                      (permission) => Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.check_circle_outline,
-                              color: AppColors.primary,
-                              size: 16,
-                            ),
-
-                            const SizedBox(width: 8),
-
-                            Expanded(
-                              child: Text(
-                                permission,
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: AppColors.authHeading,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
           ),
-        );
-      },
+        ),
+
+        // Role list.
+        Expanded(
+          child: Consumer2<StaffRoleProvider, StaffProvider>(
+            builder: (context, roleProvider, staffProvider, child) {
+              if (roleProvider.isLoading) {
+                return const Center(
+                  child: CircularProgressIndicator(color: AppColors.primary),
+                );
+              }
+
+              if (roleProvider.errorMessage != null) {
+                return Center(child: Text(roleProvider.errorMessage!));
+              }
+
+              final roles = roleProvider.roles;
+
+              if (roles.isEmpty) {
+                return const Center(
+                  child: Text(
+                    'No roles found.',
+                    style: TextStyle(color: AppColors.authIcon),
+                  ),
+                );
+              }
+
+              return ListView.separated(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                itemCount: roles.length,
+                separatorBuilder: (_, _) => const Divider(height: 1),
+                itemBuilder: (context, index) {
+                  final role = roles[index];
+
+                  return StaffRoleCard(
+                    role: role,
+                    staffCount: _getStaffCount(role),
+                    onTap: () => _openRoleDetails(role),
+                  );
+                },
+              );
+            },
+          ),
+        ),
+
+        // New role button.
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: RegisterFab(
+              label: 'New role',
+              onPressed: _openNewRoleScreen,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

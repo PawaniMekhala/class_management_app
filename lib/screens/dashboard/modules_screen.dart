@@ -32,6 +32,7 @@ import '../tutes/tutes_screen.dart';
 import '../../providers/tute_provider.dart';
 import '../../providers/staff_provider.dart';
 import '../staff/staff_screen.dart';
+import '../../providers/staff_role_provider.dart';
 
 class ModulesScreen extends StatelessWidget {
   const ModulesScreen({super.key});
@@ -422,20 +423,16 @@ class ModulesScreen extends StatelessWidget {
                       ChangeNotifierProvider<StaffProvider>(
                         create: (_) => StaffProvider(),
                       ),
+
+                      ChangeNotifierProvider<StaffRoleProvider>(
+                        create: (_) => StaffRoleProvider(),
+                      ),
                     ],
                     child: const StaffScreen(),
                   ),
                 ),
               );
             },
-          ),
-
-          // Roles And Permissions module card
-          ModuleCard(
-            title: 'Roles & Permissions',
-            description: 'Staff Roles And Permissions.',
-            icon: Icons.badge_outlined,
-            onTap: () {},
           ),
         ],
       ),

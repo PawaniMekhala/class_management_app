@@ -7,6 +7,7 @@ class StaffProvider extends ChangeNotifier {
   final StaffService _service = StaffService();
 
   List<StaffModel> _staff = [];
+  List<StaffModel> get allStaff => List.unmodifiable(_staff);
 
   bool isLoading = false;
   String? errorMessage;

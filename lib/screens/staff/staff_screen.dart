@@ -7,6 +7,7 @@ import '../../providers/selected_institute_provider.dart';
 import '../../models/staff_model.dart';
 import '../../widgets/cards/staff_card.dart';
 import 'staff_form_screen.dart';
+import '../../widgets/buttons/register_fab.dart';
 
 import 'roles_permissions_tab.dart';
 
@@ -239,17 +240,11 @@ class _StaffScreenState extends State<StaffScreen> {
 
       // Register button only appears on Staff tab.
       floatingActionButton: _selectedTab == 0
-          ? FloatingActionButton.extended(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
+          ? RegisterFab(
+              label: 'Register staff',
               onPressed: () {
                 _openStaffForm();
               },
-              icon: const Icon(Icons.add),
-              label: const Text(
-                'Register staff',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-              ),
             )
           : null,
     );
