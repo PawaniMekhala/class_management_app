@@ -82,4 +82,63 @@ class StaffRoleProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<bool> updateRole(StaffRoleModel updatedRole) async {
+    if (isSaving) return false;
+
+    isSaving = true;
+    errorMessage = null;
+    notifyListeners();
+
+    try {
+      await _service.updateRole(updatedRole);
+
+      _roles = await _service.getRoles(updatedRole.instituteId);
+
+      return true;
+    } catch (error) {
+      errorMessage = error.toString().replaceFirst('Exception: ', '');
+      return false;
+    } finally {
+      isSaving = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> deleteRole({
+    required int instituteId,
+    required int roleId,
+    required bool hasAssignedStaff,
+  }) async {
+    if (isSaving) return false;
+
+    errorMessage = null;
+
+    if (hasAssignedStaff) {
+      errorMessage =
+          'This role is assigned to staff members. '
+          'Please reassign them before deleting the role.';
+
+      notifyListeners();
+      return false;
+    }
+
+    isSaving = true;
+    notifyListeners();
+
+    try {
+      await _service.deleteRole(instituteId: instituteId, roleId: roleId);
+
+      _roles = await _service.getRoles(instituteId);
+
+      return true;
+    } catch (error) {
+      errorMessage = error.toString().replaceFirst('Exception: ', '');
+
+      return false;
+    } finally {
+      isSaving = false;
+      notifyListeners();
+    }
+  }
 }

@@ -8,6 +8,7 @@ import '../../providers/staff_provider.dart';
 import '../../providers/staff_role_provider.dart';
 import '../../widgets/cards/staff_role_card.dart';
 import '../../widgets/buttons/register_fab.dart';
+import 'role_editor_screen.dart';
 
 import 'new_role_screen.dart';
 
@@ -21,18 +22,28 @@ class RolesPermissionsTab extends StatefulWidget {
 class _RolesPermissionsTabState extends State<RolesPermissionsTab> {
   final TextEditingController _searchController = TextEditingController();
 
+  int? _loadedInstituteId;
+
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    final instituteId = context
+        .watch<SelectedInstituteProvider>()
+        .selectedInstituteId;
+
+    if (_loadedInstituteId == instituteId) return;
+
+    _loadedInstituteId = instituteId;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
 
-      final instituteId = context
-          .read<SelectedInstituteProvider>()
-          .selectedInstituteId;
+      _searchController.clear();
 
-      context.read<StaffRoleProvider>().loadRoles(instituteId);
+      final provider = context.read<StaffRoleProvider>();
+      provider.clearSearch();
+      provider.loadRoles(instituteId);
     });
   }
 
@@ -89,18 +100,35 @@ class _RolesPermissionsTabState extends State<RolesPermissionsTab> {
     }
   }
 
-  void _openRoleDetails(StaffRoleModel role) {
-    // TO DO: Implement the Role Details & Permissions screen.
-    // This screen will display the selected role's module
-    // permissions and allow authorized changes.
+  Future<void> _openRoleDetails(StaffRoleModel role) async {
+    final roleProvider = context.read<StaffRoleProvider>();
+    final staffProvider = context.read<StaffProvider>();
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          '${role.name} permissions screen will be implemented next.',
+    final changed = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => MultiProvider(
+          providers: [
+            ChangeNotifierProvider<StaffRoleProvider>.value(
+              value: roleProvider,
+            ),
+            ChangeNotifierProvider<StaffProvider>.value(value: staffProvider),
+          ],
+          child: RoleEditorScreen(role: role),
         ),
       ),
     );
+
+    if (!mounted) return;
+
+    if (changed == true) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Role changes saved successfully.'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    }
   }
 
   @override
