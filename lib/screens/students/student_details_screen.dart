@@ -13,6 +13,8 @@ import '../../models/student_model.dart';
 import '../../providers/student_detail_provider.dart';
 import '../../widgets/cards/student_enrolled_class_tile.dart';
 import '../../widgets/cards/student_qr_card.dart';
+import '../../providers/enrollment_provider.dart';
+import '../enrollment/enroll_student_screen.dart';
 
 class StudentDetailsScreen extends StatelessWidget {
   final StudentModel student;
@@ -51,6 +53,47 @@ class _StudentDetailsViewState extends State<_StudentDetailsView> {
   final ScreenshotController _screenshotController = ScreenshotController();
 
   bool _isSharing = false;
+
+  Future<void> _openClassEnrollment(StudentDetailModel student) async {
+    final enrollmentProvider = EnrollmentProvider();
+
+    try {
+      final enrolled = await Navigator.push<bool>(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ChangeNotifierProvider<EnrollmentProvider>.value(
+            value: enrollmentProvider,
+            child: EnrollStudentScreen(
+              instituteId: student.instituteId,
+              studentId: student.id,
+            ),
+          ),
+        ),
+      );
+
+      if (!mounted) return;
+
+      if (enrolled == true) {
+        final detailProvider = context.read<StudentDetailProvider>();
+
+        await detailProvider.loadStudent(
+          instituteId: student.instituteId,
+          studentId: student.id,
+          studentName: student.name,
+          studentCode: student.studentCode,
+          grade: student.grade,
+        );
+
+        if (!mounted) return;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Student enrolled successfully.')),
+        );
+      }
+    } finally {
+      enrollmentProvider.dispose();
+    }
+  }
 
   Future<void> _downloadQrCard(StudentDetailModel student) async {
     if (_isSharing) return;
@@ -299,18 +342,7 @@ class _StudentDetailsViewState extends State<_StudentDetailsView> {
               ),
 
               TextButton.icon(
-                onPressed: () {
-                  // TO DO: ADMIN ACTION
-                  // Open the Enroll Student in Class screen.
-                  // Pass student.id and student.instituteId.
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'Class enrollment screen will be added later.',
-                      ),
-                    ),
-                  );
-                },
+                onPressed: () => _openClassEnrollment(student),
                 icon: const Icon(Icons.person_add_alt_1, size: 16),
                 label: const Text('Enroll', style: TextStyle(fontSize: 11)),
                 style: TextButton.styleFrom(foregroundColor: AppColors.primary),

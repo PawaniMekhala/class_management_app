@@ -15,8 +15,13 @@ import '../../widgets/common/payment_plan_dropdown.dart';
 
 class EnrollStudentScreen extends StatefulWidget {
   final int instituteId;
+  final int? studentId;
 
-  const EnrollStudentScreen({super.key, required this.instituteId});
+  const EnrollStudentScreen({
+    super.key,
+    required this.instituteId,
+    this.studentId,
+  });
 
   @override
   State<EnrollStudentScreen> createState() => _EnrollStudentScreenState();
@@ -43,9 +48,24 @@ class _EnrollStudentScreenState extends State<EnrollStudentScreen> {
     try {
       final students = await StudentService().getStudents(widget.instituteId);
       final classes = await ClassService().getClasses(widget.instituteId);
+
+      debugPrint('Enrollment institute ID: ${widget.instituteId}');
+      debugPrint('Number of classes loaded: ${classes.length}');
+
+      for (final item in classes) {
+        debugPrint('Class: ${item.name}, ID: ${item.id}');
+      }
+
       final paymentPlans = await PaymentPlanService().getPlans(
         widget.instituteId,
       );
+
+      debugPrint('Institute ID: ${widget.instituteId}');
+      debugPrint('Available payment plans: ${paymentPlans.length}');
+
+      for (final plan in paymentPlans) {
+        debugPrint('Payment plan: ${plan.name}');
+      }
 
       if (!mounted) return;
 
@@ -53,6 +73,18 @@ class _EnrollStudentScreenState extends State<EnrollStudentScreen> {
         _students = students;
         _classes = classes;
         _availablePaymentPlans = paymentPlans;
+
+        // Automatically select the student when opened
+        // from Student Details.
+        if (widget.studentId != null) {
+          for (final student in students) {
+            if (student.id == widget.studentId) {
+              _student = student;
+              break;
+            }
+          }
+        }
+
         _loading = false;
       });
     } catch (_) {
@@ -183,15 +215,27 @@ class _EnrollStudentScreenState extends State<EnrollStudentScreen> {
                   style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
                 ),
               ),
-              for (final item in _classes)
-                ListTile(
-                  title: Text(item.name),
-                  subtitle: Text(
-                    '${item.code} · ${item.grade} · '
-                    '${item.enrolledCount}/${item.maxStudents} students',
+              if (_classes.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.all(24),
+                  child: Center(
+                    child: Text(
+                      'No classes available for this institute.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 13, color: AppColors.authIcon),
+                    ),
                   ),
-                  onTap: () => Navigator.pop(sheetContext, item),
-                ),
+                )
+              else
+                for (final item in _classes)
+                  ListTile(
+                    title: Text(item.name),
+                    subtitle: Text(
+                      '${item.code} · ${item.grade} · '
+                      '${item.enrolledCount}/${item.maxStudents} students',
+                    ),
+                    onTap: () => Navigator.pop(sheetContext, item),
+                  ),
             ],
           ),
         ),
@@ -199,10 +243,13 @@ class _EnrollStudentScreenState extends State<EnrollStudentScreen> {
     );
 
     if (chosen != null && mounted) {
+      debugPrint('Selected class: ${chosen.name}');
+      debugPrint('Class default payment plan: ${chosen.paymentPlanName}');
       PaymentPlanModel? defaultPlan;
 
       for (final plan in _availablePaymentPlans) {
-        if (plan.name == chosen.paymentPlanName) {
+        if (plan.name.trim().toLowerCase() ==
+            chosen.paymentPlanName.trim().toLowerCase()) {
           defaultPlan = plan;
           break;
         }
