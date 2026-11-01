@@ -33,6 +33,7 @@ import '../../providers/tute_provider.dart';
 import '../../providers/staff_provider.dart';
 import '../staff/staff_screen.dart';
 import '../../providers/staff_role_provider.dart';
+import '../institute_settings/institute_settings_screen.dart';
 
 class ModulesScreen extends StatelessWidget {
   const ModulesScreen({super.key});
@@ -430,6 +431,27 @@ class ModulesScreen extends StatelessWidget {
                     ],
                     child: const StaffScreen(),
                   ),
+                ),
+              );
+            },
+          ),
+
+          // Settings module card
+          ModuleCard(
+            title: 'Settings',
+            description: 'Institute Settings & Profile',
+            icon: Icons.settings,
+            onTap: () {
+              final selectedInstituteProvider = context
+                  .read<SelectedInstituteProvider>();
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) =>
+                      ChangeNotifierProvider<SelectedInstituteProvider>.value(
+                        value: selectedInstituteProvider,
+                        child: const InstituteSettingsScreen(),
+                      ),
                 ),
               );
             },
