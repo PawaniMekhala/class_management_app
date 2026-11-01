@@ -5,14 +5,22 @@ import '../../core/theme/app_colors.dart';
 import '../../providers/institute_settings_provider.dart';
 import '../../providers/selected_institute_provider.dart';
 import 'institute_profile_tab.dart';
+import '../../providers/institute_branch_provider.dart';
+import 'institute_branches_tab.dart';
+import '../../providers/profile_provider.dart';
+import '../auth/register_institute_screen.dart';
 
 class InstituteSettingsScreen extends StatelessWidget {
   const InstituteSettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => InstituteSettingsProvider(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => InstituteSettingsProvider()),
+        ChangeNotifierProvider(create: (_) => InstituteBranchProvider()),
+        ChangeNotifierProvider(create: (_) => ProfileProvider()..loadProfile()),
+      ],
       child: const _InstituteSettingsView(),
     );
   }
@@ -47,6 +55,63 @@ class _InstituteSettingsViewState extends State<_InstituteSettingsView> {
     });
   }
 
+  Future<bool?> _openRegisterInstitute() async {
+    final profileProvider = context.read<ProfileProvider>();
+
+    if (profileProvider.profile == null) {
+      await profileProvider.loadProfile();
+    }
+
+    if (!mounted) return false;
+
+    final profile = profileProvider.profile;
+
+    if (profile == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Unable to load admin details.')),
+      );
+      return false;
+    }
+
+    debugPrint('========== ADD BRANCH DEBUG ==========');
+    debugPrint('Profile name: ${profile.name}');
+    debugPrint('Profile role: ${profile.role}');
+    debugPrint('Profile email: ${profile.email}');
+    debugPrint('======================================');
+
+    // TO DO: Replace this check with backend role/permission
+    // validation when authentication is integrated.
+    final normalizedRole = profile.role.trim().toLowerCase().replaceAll(
+      RegExp(r'[\s_-]'),
+      '',
+    );
+
+    final isAdmin =
+        normalizedRole == 'admin' ||
+        normalizedRole == 'instituteadmin' ||
+        normalizedRole == 'instituteowner';
+
+    if (!isAdmin) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Only admins can add branches.')),
+      );
+      return false;
+    }
+
+    return Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => RegisterInstituteScreen(
+          isAddingBranch: true,
+          ownerName: profile.name,
+          ownerEmail: profile.email,
+          ownerMobile: profile.mobile,
+          ownerNic: null,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -71,11 +136,11 @@ class _InstituteSettingsViewState extends State<_InstituteSettingsView> {
             ],
           ),
         ),
-        body: const TabBarView(
+        body: TabBarView(
           children: [
-            InstituteProfileTab(),
-            Center(child: Text('Branches — coming next')),
-            Center(child: Text('Rules — coming next')),
+            const InstituteProfileTab(),
+            InstituteBranchesTab(onAddBranch: _openRegisterInstitute),
+            const Center(child: Text('Rules — coming next')),
           ],
         ),
       ),
