@@ -9,7 +9,10 @@ class InstituteSettingsService {
       organization: 'Sipsala Education (Pvt) Ltd',
       email: 'gampaha@sipsala.demo.ims.lk',
       contact: '0332220001',
-      address: 'No. 25, Colombo Road, Gampaha, Gampaha',
+      address: 'No. 25, Colombo Road, Gampaha',
+      postalCode: '',
+      districtId: '',
+      cityId: '',
       establishedDate: DateTime(2012, 1, 15),
     ),
     2: InstituteSettingsModel(
@@ -20,6 +23,9 @@ class InstituteSettingsService {
       email: 'kandy@sipsala.demo.ims.lk',
       contact: '0812220001',
       address: 'Kandy, Sri Lanka',
+      postalCode: '',
+      districtId: '',
+      cityId: '',
       establishedDate: DateTime(2016, 3, 10),
     ),
   };

@@ -6,9 +6,95 @@ import '../../core/theme/app_colors.dart';
 import '../../providers/institute_settings_provider.dart';
 import '../../widgets/common/settings_detail_row.dart';
 import 'edit_institute_profile_screen.dart';
+import '../../core/services/location_service.dart';
+import '../../models/district_model.dart';
+import '../../models/city_model.dart';
 
-class InstituteProfileTab extends StatelessWidget {
+class InstituteProfileTab extends StatefulWidget {
   const InstituteProfileTab({super.key});
+
+  @override
+  State<InstituteProfileTab> createState() => _InstituteProfileTabState();
+}
+
+class _InstituteProfileTabState extends State<InstituteProfileTab> {
+  final LocationService _locationService = LocationService();
+
+  String? _districtName;
+  String? _cityName;
+
+  String? _loadedDistrictId;
+  String? _loadedCityId;
+
+  bool _isLoadingLocation = false;
+  String? _locationError;
+
+  int _locationRequestId = 0;
+
+  Future<void> _loadLocationNames(String districtId, String cityId) async {
+    final requestId = ++_locationRequestId;
+
+    setState(() {
+      _isLoadingLocation = true;
+      _locationError = null;
+      _districtName = null;
+      _cityName = null;
+    });
+
+    try {
+      final List<DistrictModel> districts = await _locationService
+          .getDistricts();
+
+      if (!mounted || requestId != _locationRequestId) return;
+
+      String? districtName;
+
+      for (final district in districts) {
+        if (district.id == districtId) {
+          districtName = district.name;
+          break;
+        }
+      }
+
+      String? cityName;
+
+      if (districtId.isNotEmpty) {
+        final List<CityModel> cities = await _locationService.getCities(
+          districtId,
+        );
+
+        if (!mounted || requestId != _locationRequestId) return;
+
+        for (final city in cities) {
+          if (city.id == cityId) {
+            cityName = city.name;
+            break;
+          }
+        }
+      }
+
+      if (!mounted || requestId != _locationRequestId) return;
+
+      setState(() {
+        _districtName = districtName;
+        _cityName = cityName;
+        _isLoadingLocation = false;
+      });
+    } catch (error) {
+      if (!mounted || requestId != _locationRequestId) return;
+
+      setState(() {
+        _locationError = 'Unable to load location names';
+        _isLoadingLocation = false;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _locationRequestId++;
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,6 +111,18 @@ class InstituteProfileTab extends StatelessWidget {
         }
 
         final institute = provider.institute!;
+
+        if (_loadedDistrictId != institute.districtId ||
+            _loadedCityId != institute.cityId) {
+          _loadedDistrictId = institute.districtId;
+          _loadedCityId = institute.cityId;
+
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+
+            _loadLocationNames(institute.districtId, institute.cityId);
+          });
+        }
 
         return SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(20, 18, 20, 28),
@@ -67,11 +165,40 @@ class InstituteProfileTab extends StatelessWidget {
                 value: institute.address,
               ),
               SettingsDetailRow(
-                icon: Icons.event_outlined,
-                label: 'Established',
-                value: DateFormat('d MMMM yyyy')
-                    .format(institute.establishedDate),
+                icon: Icons.markunread_mailbox_outlined,
+                label: 'Postal code',
+                value: institute.postalCode,
               ),
+              SettingsDetailRow(
+                icon: Icons.event_outlined,
+                label: 'Established Date',
+                value: institute.establishedDate != null
+                    ? DateFormat('d MMMM yyyy')
+                          .format(institute.establishedDate!)
+                    : 'Not available',
+              ),
+              SettingsDetailRow(
+                icon: Icons.map_outlined,
+                label: 'District',
+                value: _isLoadingLocation
+                    ? 'Loading...'
+                    : _districtName ?? 'Not available',
+              ),
+              SettingsDetailRow(
+                icon: Icons.location_city_outlined,
+                label: 'City',
+                value: _isLoadingLocation
+                    ? 'Loading...'
+                    : _cityName ?? 'Not available',
+              ),
+              if (_locationError != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Text(
+                    _locationError!,
+                    style: const TextStyle(fontSize: 12, color: Colors.red),
+                  ),
+                ),
 
               const SizedBox(height: 10),
 
