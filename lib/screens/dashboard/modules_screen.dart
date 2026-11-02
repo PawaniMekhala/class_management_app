@@ -34,6 +34,7 @@ import '../../providers/staff_provider.dart';
 import '../staff/staff_screen.dart';
 import '../../providers/staff_role_provider.dart';
 import '../institute_settings/institute_settings_screen.dart';
+import '../../providers/teacher_leave_provider.dart';
 
 class ModulesScreen extends StatelessWidget {
   const ModulesScreen({super.key});
@@ -128,8 +129,25 @@ class ModulesScreen extends StatelessWidget {
                       ChangeNotifierProvider<SelectedInstituteProvider>.value(
                         value: selectedInstituteProvider,
                       ),
+
                       ChangeNotifierProvider<TeacherProvider>(
                         create: (_) => TeacherProvider(),
+                      ),
+
+                      ChangeNotifierProvider<TeacherLeaveProvider>(
+                        create: (_) => TeacherLeaveProvider(),
+                      ),
+
+                      ChangeNotifierProvider<HallProvider>(
+                        create: (context) {
+                          final provider = HallProvider();
+
+                          provider.loadHalls(
+                            selectedInstituteProvider.selectedInstituteId,
+                          );
+
+                          return provider;
+                        },
                       ),
                     ],
                     child: const TeachersScreen(),

@@ -8,6 +8,9 @@ import '../../widgets/buttons/register_fab.dart';
 import '../../widgets/cards/teacher_list_tile.dart';
 import 'teacher_details_screen.dart';
 import 'find_teacher_screen.dart';
+import '../../providers/teacher_leave_provider.dart';
+import 'teacher_leave_tab.dart';
+import '../../providers/hall_provider.dart';
 
 class TeachersScreen extends StatefulWidget {
   const TeachersScreen({super.key});
@@ -16,9 +19,23 @@ class TeachersScreen extends StatefulWidget {
   State<TeachersScreen> createState() => _TeachersScreenState();
 }
 
-class _TeachersScreenState extends State<TeachersScreen> {
+class _TeachersScreenState extends State<TeachersScreen>
+    with SingleTickerProviderStateMixin {
   int? _loadedInstituteId;
   final TextEditingController _searchController = TextEditingController();
+
+  late final TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _tabController = TabController(length: 2, vsync: this);
+
+    _tabController.addListener(() {
+      if (mounted) setState(() {});
+    });
+  }
 
   @override
   void didChangeDependencies() {
@@ -37,12 +54,17 @@ class _TeachersScreenState extends State<TeachersScreen> {
         if (!mounted) return;
 
         context.read<TeacherProvider>().loadTeachers(instituteId);
+
+        context.read<TeacherLeaveProvider>().loadRequests(instituteId);
+
+        context.read<HallProvider>().loadHalls(instituteId);
       });
     }
   }
 
   @override
   void dispose() {
+    _tabController.dispose();
     _searchController.dispose();
     super.dispose();
   }
@@ -67,6 +89,133 @@ class _TeachersScreenState extends State<TeachersScreen> {
     );
   }
 
+  Widget _buildTeachersTab() {
+    return Column(
+      children: [
+        // Search bar
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
+          child: Consumer<TeacherProvider>(
+            builder: (context, provider, child) {
+              return TextField(
+                controller: _searchController,
+                onChanged: provider.searchTeachers,
+                textInputAction: TextInputAction.search,
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: AppColors.authHeading,
+                ),
+                cursorColor: AppColors.primary,
+                decoration: InputDecoration(
+                  hintText: 'Search name, code, mobile, NIC',
+                  hintStyle: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.authIcon,
+                  ),
+                  prefixIcon: const Icon(
+                    Icons.search,
+                    color: AppColors.authIcon,
+                    size: 19,
+                  ),
+                  filled: true,
+                  fillColor: AppColors.surface,
+                  contentPadding: const EdgeInsets.symmetric(
+                    vertical: 12,
+                    horizontal: 12,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(
+                      color: AppColors.profileDivider,
+                    ),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(
+                      color: AppColors.profileDivider,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: AppColors.primary),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+
+        // Teacher list
+        Expanded(
+          child: Consumer<TeacherProvider>(
+            builder: (context, provider, child) {
+              if (provider.isLoading) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              if (provider.errorMessage != null) {
+                return Center(child: Text(provider.errorMessage!));
+              }
+
+              if (provider.teachers.isEmpty) {
+                return const Center(
+                  child: Text(
+                    'No teachers found',
+                    style: TextStyle(color: AppColors.authIcon, fontSize: 12),
+                  ),
+                );
+              }
+
+              return RefreshIndicator(
+                onRefresh: () {
+                  final instituteId = context
+                      .read<SelectedInstituteProvider>()
+                      .selectedInstituteId;
+
+                  return provider.loadTeachers(instituteId);
+                },
+                child: ListView.separated(
+                  padding: const EdgeInsets.only(bottom: 95),
+                  itemCount: provider.teachers.length,
+                  separatorBuilder: (_, _) => const Divider(
+                    height: 1,
+                    indent: 63,
+                    color: AppColors.profileDivider,
+                  ),
+                  itemBuilder: (context, index) {
+                    final teacher = provider.teachers[index];
+
+                    return TeacherListTile(
+                      teacher: teacher,
+                      onTap: () {
+                        final instituteId = context
+                            .read<SelectedInstituteProvider>()
+                            .selectedInstituteId;
+
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => TeacherDetailsScreen(
+                              teacher: teacher,
+                              instituteId: instituteId,
+                            ),
+                          ),
+                        );
+                      },
+                      onMenuSelected: (action) {
+                        _handleTeacherMenu(action, teacher.id);
+                      },
+                    );
+                  },
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -85,148 +234,45 @@ class _TeachersScreenState extends State<TeachersScreen> {
             fontWeight: FontWeight.w600,
           ),
         ),
+
+        bottom: TabBar(
+          controller: _tabController,
+          labelColor: AppColors.primary,
+          unselectedLabelColor: AppColors.authIcon,
+          indicatorColor: AppColors.primary,
+          labelStyle: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+          ),
+          tabs: const [
+            Tab(text: 'Teachers'),
+            Tab(text: 'Teacher Leave'),
+          ],
+        ),
       ),
 
-      body: Column(
-        children: [
-          // Search bar
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
-            child: Consumer<TeacherProvider>(
-              builder: (context, provider, child) {
-                return TextField(
-                  controller: _searchController,
-                  onChanged: provider.searchTeachers,
-                  textInputAction: TextInputAction.search,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AppColors.authHeading,
-                  ),
-                  cursorColor: AppColors.primary,
-                  decoration: InputDecoration(
-                    hintText: 'Search name, code, mobile, NIC',
-                    hintStyle: const TextStyle(
-                      fontSize: 12,
-                      color: AppColors.authIcon,
-                    ),
-                    prefixIcon: const Icon(
-                      Icons.search,
-                      color: AppColors.authIcon,
-                      size: 19,
-                    ),
-                    filled: true,
-                    fillColor: AppColors.surface,
-                    contentPadding: const EdgeInsets.symmetric(
-                      vertical: 12,
-                      horizontal: 12,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(
-                        color: AppColors.profileDivider,
-                      ),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(
-                        color: AppColors.profileDivider,
-                      ),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: AppColors.primary),
-                    ),
+      body: TabBarView(
+        controller: _tabController,
+        children: [_buildTeachersTab(), const TeacherLeaveTab()],
+      ),
+
+      floatingActionButton: _tabController.index == 0
+          ? RegisterFab(
+              label: 'Register teacher',
+              onPressed: () {
+                final instituteId = context
+                    .read<SelectedInstituteProvider>()
+                    .selectedInstituteId;
+
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => FindTeacherScreen(instituteId: instituteId),
                   ),
                 );
               },
-            ),
-          ),
-
-          // Teacher list
-          Expanded(
-            child: Consumer<TeacherProvider>(
-              builder: (context, provider, child) {
-                if (provider.isLoading) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-
-                if (provider.errorMessage != null) {
-                  return Center(child: Text(provider.errorMessage!));
-                }
-
-                if (provider.teachers.isEmpty) {
-                  return const Center(
-                    child: Text(
-                      'No teachers found',
-                      style: TextStyle(color: AppColors.authIcon, fontSize: 12),
-                    ),
-                  );
-                }
-
-                return RefreshIndicator(
-                  onRefresh: () {
-                    final instituteId = context
-                        .read<SelectedInstituteProvider>()
-                        .selectedInstituteId;
-
-                    return provider.loadTeachers(instituteId);
-                  },
-                  child: ListView.separated(
-                    padding: const EdgeInsets.only(bottom: 95),
-                    itemCount: provider.teachers.length,
-                    separatorBuilder: (_, _) => const Divider(
-                      height: 1,
-                      indent: 63,
-                      color: AppColors.profileDivider,
-                    ),
-                    itemBuilder: (context, index) {
-                      final teacher = provider.teachers[index];
-
-                      return TeacherListTile(
-                        teacher: teacher,
-                        onTap: () {
-                          final instituteId = context
-                              .read<SelectedInstituteProvider>()
-                              .selectedInstituteId;
-
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => TeacherDetailsScreen(
-                                teacher: teacher,
-                                instituteId: instituteId,
-                              ),
-                            ),
-                          );
-                        },
-                        onMenuSelected: (action) {
-                          _handleTeacherMenu(action, teacher.id);
-                        },
-                      );
-                    },
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-
-      floatingActionButton: RegisterFab(
-        label: 'Register teacher',
-        onPressed: () {
-          final instituteId = context
-              .read<SelectedInstituteProvider>()
-              .selectedInstituteId;
-
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => FindTeacherScreen(instituteId: instituteId),
-            ),
-          );
-        },
-      ),
+            )
+          : null,
     );
   }
 }

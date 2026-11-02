@@ -14,6 +14,8 @@ class HallProvider extends ChangeNotifier {
   String? errorMessage;
   final Set<int> _updatingHallIds = {};
 
+  List<HallModel> get allHalls => List.unmodifiable(_halls);
+
   List<HallModel> get halls {
     final query = _searchQuery.trim().toLowerCase();
 

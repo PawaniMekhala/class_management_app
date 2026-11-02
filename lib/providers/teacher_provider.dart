@@ -13,6 +13,8 @@ class TeacherProvider extends ChangeNotifier {
   bool isLoading = false;
   String? errorMessage;
 
+  List<TeacherModel> get allTeachers => List.unmodifiable(_teachers);
+
   List<TeacherModel> get teachers {
     final query = _searchQuery.trim().toLowerCase();
 

@@ -28,7 +28,7 @@ class ModuleCard extends StatelessWidget {
           child: Row(
             children: [
               Container(
-                width: 36,
+                width: 32,
                 height: 36,
                 decoration: const BoxDecoration(
                   color: AppColors.moduleIconBackground,
